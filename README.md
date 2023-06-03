@@ -5,3 +5,5 @@
 
 已完成：图片至文本（基于pytesseract），gpt3.5 api请求，openai语言识别api请求，DALLE api调用
 计划中：gpt3.5请求改为流式传输，增加翻译api请求，编写一个简单的整合文本与图形输入的gui
+
+:)所有api密钥都是失效的
