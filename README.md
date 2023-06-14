@@ -10,7 +10,7 @@ Aim to write a gui interface using pyqt6 to recognize and manipulate multiple in
 
 Completed a simple GUI page for translating any language into Simplified Chinese, with support for clipboard real-time monitoring of automatic translation (enabled by default, can be turned off).
 
-![Check the Clip]()
+![Check the Clip](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/clip_show.gif?raw=true)
 
 下一步：添加更多支持的目标语言，让gpt3.5根据输入内容自动识别操作：翻译/Gpt3.5生成文本/图像识别（预计使用bing api）。
 
@@ -20,7 +20,7 @@ Next step: add more supported target languages to allow gpt3.5 to automatically 
 
 If you want to change the target language, change 'zh' to your target language (expect to add the option in the next version)
 
-![change the target language]()
+![change the target language](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/Change_lang.png?raw=true)
 
 # 其他 / Other
 已完成的api调用：图片至文本（基于pytesseract），gpt3.5 api请求，openai语言识别api请求，DALLE api调用,翻译api请求。纯新手，欢迎指正。
