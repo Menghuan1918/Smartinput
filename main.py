@@ -1,4 +1,4 @@
-
+import pyperclip
 import sys
 from PyQt6 import QtCore, QtGui, QtWidgets
 from translate import Translator
@@ -35,10 +35,10 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.actionQuit = QtGui.QAction(parent=MainWindow)
-        self.actionQuit.setObjectName("actionQuit")
+        self.actionQuit.setObjectName("Check Clipboard")
         self.menuMain.addAction(self.actionQuit)
         self.menubar.addAction(self.menuMain.menuAction())
-        self.actionQuit.triggered.connect(sys.exit) 
+        self.actionQuit.triggered.connect(self.check_clipboard_change)
 
         self.retranslateUi(MainWindow)
         self.pushButton_2.clicked.connect(self.textEdit.clear)
@@ -48,22 +48,57 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "翻译器"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "ENG TO CN"))
         self.pushButton.setText(_translate("MainWindow", "Translate"))
         self.pushButton_2.setText(_translate("MainWindow", "Clear"))
         self.menuMain.setTitle(_translate("MainWindow", "Main"))
-        self.actionQuit.setText(_translate("MainWindow", "Quit"))
+        self.actionQuit.setText(_translate("MainWindow", "Check Clipboard"))
+    
+    def check_clipboard_change(self):
+        global check
+        if(check == True):
+            check = False
+            info_check = "Stop checking clipboard"
+            self.textBrowser.setText(info_check)
+            self.statusbar.showMessage(info_check)
+            print(info_check)
+        elif(check == False):
+            check = True
+            info_check = "Start checking clipboard"
+            self.textBrowser.setText(info_check)
+            self.statusbar.showMessage(info_check)
+            print(info_check)
+            self.check_clipboard()
 
     def translate_to_chinese(self):
         text = self.textEdit.toPlainText()
         translator = Translator(to_lang='zh')
         translation = translator.translate(text)
         self.textBrowser.setText(translation)
+    
+    def clipboard_to_chinese(self):
+        text = pyperclip.paste()
+        self.textEdit.setText(text)
+        translator = Translator(to_lang='zh')
+        translation = translator.translate(text)
+        self.textBrowser.setText(translation)
+    
+    def check_clipboard(self):
+        previous_clipboard = pyperclip.paste()
+        while check:
+            current_clipboard = pyperclip.paste()
+            if current_clipboard != previous_clipboard:
+                self.clipboard_to_chinese()
+                previous_clipboard = current_clipboard
+            QtWidgets.QApplication.processEvents()
 
 if __name__=="__main__":
+    check  = True
     app=QtWidgets.QApplication(sys.argv)
     MainWindow=QtWidgets.QMainWindow()
     ui=Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
+    if check:
+        ui.check_clipboard()
     sys.exit(app.exec())
