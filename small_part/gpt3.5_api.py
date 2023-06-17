@@ -2,7 +2,7 @@ import os
 import openai
 import json
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "sk-"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def write_message_to_file(file_path, role, content):

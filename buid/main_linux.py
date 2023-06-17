@@ -136,7 +136,7 @@ class Main_ui(QtWidgets.QMainWindow):
     def TKenter(self):
         # 传统输入模式
         self.check = True
-        subprocess.Popen(["python3", "tk_enter.py"])
+        subprocess.Popen(["./tk_enter"])
 
     def closeEvent(self, event):
         # 重写closeEvent方法，实现窗口关闭时执行一些操作

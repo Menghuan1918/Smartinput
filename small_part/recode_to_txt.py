@@ -3,7 +3,7 @@ import wave
 import threading
 import openai
 import os
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "sk-"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class AudioRecorder:
