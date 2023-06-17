@@ -7,17 +7,19 @@ This project is currently in its initial stage and should be available on both l
 
 Add input interface written by tkinter, it can solve the problem that linux can't use fcitx5 in some environment. Note that this input interface is communicating with main program through clipboard, so it will automatically open clipboard monitor when open. Next version is expected to improve this problem.
 
-![tkinter]()
+![tkinter](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/Input.png?raw=true)
 
-In the 0.0.2 version update, support for ChatGPT3.5 has been added which enables conversation functionality. It uses the official API of OpenAI, so you will need to register for an OpenAI account and obtain an API key. 
+Support for ChatGPT3.5 has been added which enables conversation functionality. It uses the official API of OpenAI, so you will need to register for an OpenAI account and obtain an API key. 
+
+![chat](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/chatGPT.png?raw=true)
 
 When the input is a program, the system will explain the functionality of the program, as shown in the following image:
 
-![program]()
+![program](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/Gpt_ans.png?raw=true)
 
 When the input is in the format of "language abbreviation: text to be translated", the system will provide translation functionality, as shown in the following image:
 
-![trans_GPT]()
+![trasns_GPT](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/GPT_trans.png?raw=true)
 
 All of these features are implemented through prompts in the GPT_prompt.md file, which can be modified as needed. For example, you can modify the prompts to translate to a specific language and use automatic clipboard reading to implement quick translation.
 
@@ -36,6 +38,8 @@ If you want to change the target language, change 'zh' to your target language (
 # Known issues
 
 If there is an error in calling the api of openai, it will cause the whole program to crash, this issue will be fixed in the next version (probably).
+
+The gpt history function cannot display languages other than English.
 
 # Other
 
