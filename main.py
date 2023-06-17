@@ -14,7 +14,7 @@ class GPT_file:
     def __init__(self):
         global now
         now = datetime.now()
-        time_string = now.strftime("%Y.%m.%d %H:%M:%S.txt")
+        time_string = now.strftime("%Y.%m.%d %H.%M.%S.txt")
         now = time_string
         self.file_path = time_string
 
