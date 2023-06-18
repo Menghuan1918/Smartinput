@@ -1,13 +1,13 @@
 import pyperclip
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget, QMessageBox, QApplication
-from translate import Translator
 from main_ui import Ui_MainWindow
 import sys
 import subprocess
 import gpt3_5api as gpt3
 import json
 from datetime import datetime
+from PyDeepLX import PyDeepLX
 
 
 class GPT_file:
@@ -66,8 +66,7 @@ class Main_ui(QtWidgets.QMainWindow):
     def translate_to_chinese(self):
         # 用于将输入的内容翻译为中文
         text = self.ui.textEdit.toPlainText()
-        translator = Translator(to_lang="zh")
-        translation = translator.translate(text)
+        translation = PyDeepLX.translate(text, "", "ZH")
         self.ui.textBrowser.setText(translation)
 
     def chatgpt3(self):

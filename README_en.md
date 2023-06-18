@@ -3,9 +3,13 @@
 
 This project is currently in its initial stage and should be available on both linux and windows platforms. It aims to use PyQt6 to create a GUI interface that uses OpenAI API to recognize and manipulate various inputs such as text, language, and images, and produce output in the form of text, language, and images. Support for additional APIs may be added in the future.
 
+# 0.0.2A update
+
+Changed to use [PyDeepLX](https://github.com/OwO-Network/PyDeepLX) for translation, now the auto-read clipboard translation is more useful, you can open it in the main window again.
+
 # 0.0.2 Update
 
-Add input interface written by tkinter, it can solve the problem that linux can't use fcitx5 in some environment. Note that this input interface is communicating with main program through clipboard, so it will automatically open clipboard monitor when open. Next version is expected to improve this problem.
+Add input interface written by tkinter (click the button above clear button to bring up), which can solve the problem that <b>linux</b> cannot use fcitx5 in some environment. Note, this input interface is communicating with main program through clipboard, so it will open clipboard monitor automatically when open. Next version is expected to improve this problem, so it is normal that windows can't use it.
 
 ![tkinter](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/Input.png?raw=true)
 
