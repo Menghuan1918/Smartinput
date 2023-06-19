@@ -15,8 +15,8 @@ class GPT_file:
         global now
         now = datetime.now()
         time_string = now.strftime("%Y.%m.%d %H.%M.%S.txt")
-        now = time_string
         time_string = "history/GPT/" + time_string
+        now = time_string
         self.file_path = time_string
 
     def GPT_write_message_to_file(self, role, content):
