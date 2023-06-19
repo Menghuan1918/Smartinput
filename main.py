@@ -8,6 +8,7 @@ import gpt3_5api as gpt3
 import json
 from datetime import datetime
 from PyDeepLX import PyDeepLX
+import os
 
 
 class GPT_file:
@@ -18,6 +19,10 @@ class GPT_file:
         time_string = "history/GPT/" + time_string
         now = time_string
         self.file_path = time_string
+        if not os.path.exists("history"):
+            os.mkdir("history")
+        if not os.path.exists("history/GPT"):
+            os.mkdir("history/GPT")
 
     def GPT_write_message_to_file(self, role, content):
         with open(self.file_path, "a") as file:
