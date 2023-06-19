@@ -16,6 +16,7 @@ class GPT_file:
         now = datetime.now()
         time_string = now.strftime("%Y.%m.%d %H.%M.%S.txt")
         now = time_string
+        time_string = "history/GPT/" + time_string
         self.file_path = time_string
 
     def GPT_write_message_to_file(self, role, content):
@@ -66,12 +67,18 @@ class Main_ui(QtWidgets.QMainWindow):
     def translate_to_chinese(self):
         # 用于将输入的内容翻译为中文
         text = self.ui.textEdit.toPlainText()
-        translation = PyDeepLX.translate(text, "", "ZH")
+        try:
+            translation = PyDeepLX.translate(text, "", "ZH")
+        except Exception as e:
+            translation = str(e)
         self.ui.textBrowser.setText(translation)
 
     def chatgpt3(self):
         text = self.ui.textEdit.toPlainText()
-        gpt_ans = gpt3.chat(openaikey, text, now)
+        try:
+            gpt_ans = gpt3.chat(openaikey, text, now)
+        except Exception as e:
+            gpt_ans = str(e)
         self.ui.textBrowser.setText(gpt_ans)
 
     def cghat_history(self):
