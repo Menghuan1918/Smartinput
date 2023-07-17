@@ -1,7 +1,12 @@
 # Smartinput
 ([中文](README.md) | English)
 
-This project is currently in its initial stage and should be available on both linux and windows platforms. It aims to use PyQt6 to create a GUI interface that uses OpenAI API to recognize and manipulate various inputs such as text, language, and images, and produce output in the form of text, language, and images. Support for additional APIs may be added in the future.
+Currently in its infancy, should be available on linux/win platforms.
+Aims to write a gui interface using pyqt6, (including but not limited to the openai api) that recognises and manipulates (outputs text, language, image) multiple inputs (text, language, image).
+
+# 0.0.2B update
+
+Translation is changed to first use [PyDeepLX](https://github.com/OwO-Network/PyDeepLX), if it is not successful, then use [py-googletrans](https://github.com/ssut/py-googletrans) to translate, if it is still not successful, then use [py-googletrans](https://github.com/ssut/py-googletrans) to translate. still unsuccessful, use [translate-python](https://github.com/terryyin/translate-python/tree/master) to translate.
 
 # 0.0.2A update
 
