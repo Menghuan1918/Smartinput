@@ -1,5 +1,8 @@
+googletrans==4.0.0rc1
 openai==0.27.7
+PyDeepLX==1.0.3
 PyDeepLX==1.0.3
 pyperclip==1.8.2
 PyQt6==6.5.1
 PyQt6_sip==13.5.1
+translate==3.6.1

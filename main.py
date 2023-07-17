@@ -8,6 +8,8 @@ import gpt3_5api as gpt3
 import json
 from datetime import datetime
 from PyDeepLX import PyDeepLX
+from translate import Translator
+from googletrans import Translator as G_Translator
 import os
 
 
@@ -75,7 +77,22 @@ class Main_ui(QtWidgets.QMainWindow):
         try:
             translation = PyDeepLX.translate(text, "", "ZH")
         except Exception as e:
+            e = "DeepLX error:" + str(e) + "\n"
             translation = str(e)
+            print(e)
+            try:
+                translation = G_Translator().translate(text, dest="zh-cn").text
+            except Exception as e:
+                e = "Googletrans error:" + str(e) + "\n"
+                translation = str(e)
+                print(e)
+                try:
+                    translator = Translator(to_lang="zh")
+                    translation = translator.translate(text)
+                except Exception as e:
+                    e = "Translator error:" + str(e) + "\n"
+                    translation = str(e)
+                    print(e)
         self.ui.textBrowser.setText(translation)
 
     def chatgpt3(self):
@@ -174,3 +191,4 @@ if __name__ == "__main__":
     window = Main_ui()
     window.show()
     sys.exit(app.exec())
+#生成依赖库：pipreqs . --encoding==utf8
