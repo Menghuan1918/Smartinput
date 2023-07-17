@@ -3,10 +3,13 @@
 
 目前处于起步阶段，应该可在linux/win平台可用。
 旨在使用pyqt6编写一个gui界面，(包括但不限于openai api）对多种输入（文本，语言，图像）进行识别并进行操作（输出文本，语言，图像）。
+# 0.0.2B更新
+
+翻译改为首先使用[PyDeepLX](https://github.com/OwO-Network/PyDeepLX)，如过不成功，再使用[py-googletrans](https://github.com/ssut/py-googletrans)翻译，如还是不成功，使用[translate-python ](https://github.com/terryyin/translate-python/tree/master)进行翻译。
 
 # 0.0.2A 更新
 
-改为使用[PyDeepLX](https://github.com/OwO-Network/PyDeepLX)进行翻译,现在自动读取剪切板翻译更加好用了,你可以再main窗口中将其打开.
+改为使用[PyDeepLX](https://github.com/OwO-Network/PyDeepLX)进行翻译,现在自动读取剪切板翻译更加好用了,你可以在main窗口的菜单中将其打开.
 
 # 0.0.2更新
 添加使用tkinter编写的输入界面(点击clear按钮上方的按钮调出)，可解决<b>某些环境下linux</b>无法使用fcitx5的问题。注意，这个输入界面是通过剪切板与主程序通讯的，因此打开的同时会自动打开剪切板监控。预计下一版会改进这个问题,因此windows不能用是很正常的.
