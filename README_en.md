@@ -14,7 +14,7 @@ Changed to use [PyDeepLX](https://github.com/OwO-Network/PyDeepLX) for translati
 
 # 0.0.2 Update
 
-Add input interface written by tkinter (click the button above clear button to bring up), which can solve the problem that <b>linux</b> cannot use fcitx5 in some environment. Note, this input interface is communicating with main program through clipboard, so it will open clipboard monitor automatically when open. Next version is expected to improve this problem, so it is normal that windows can't use it.
+Add input interface written by tkinter (click the button above clear button to bring up), which can solve the problem that <b> linux </b> cannot use fcitx5 in some environment. Note, this input interface is communicating with main program through clipboard, so it will open clipboard monitor automatically when open. Next version is expected to improve this problem, so it is normal that windows can't use it.
 
 ![tkinter](https://github.com/Menghuan1918/Smartinput/blob/main/pictures/Input.png?raw=true)
 
