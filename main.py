@@ -4,7 +4,7 @@ from PyQt6.QtGui import QCursor, QCloseEvent, QIcon, QPixmap, QAction
 from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QMessageBox
 from PyQt6.QtCore import QTimer, Qt, QTranslator, QLocale
 import os
-from .Get_Config import read_config_file
+from Get_Config import read_config_file
 
 
 class TextSelectionMonitor(QLabel):

@@ -3,7 +3,7 @@ import logging
 import shutil
 
 def read_config_file():
-    config_file_path = '~/.smartinput/config'
+    config_file_path = os.path.expanduser('~/.config/smartinput/config')
     config = {}
     try:
         with open(config_file_path, 'r') as file:
