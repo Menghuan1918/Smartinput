@@ -115,9 +115,9 @@ def predict(
         model=llm_kwargs["llm_model"],
         key=APIKEY,
         history=history,
-        token=llm_kwargs["max_tokens"],
+        token=int(llm_kwargs["max_tokens"]),
         system_prompt=system_prompt,
-        temperature=llm_kwargs["temperature"],
+        temperature=float(llm_kwargs["temperature"]),
     )
 
     history.append(inputs)
@@ -126,14 +126,15 @@ def predict(
     while True:
         try:
             endpoint = llm_kwargs["endpoint"]
-            if llm_kwargs["proxies"] != {}:
+            if llm_kwargs["proxies"] != "{}":
+                # ! Can't use proxies now
                 response = requests.post(
                     endpoint,
                     headers=headers,
                     proxies=llm_kwargs["proxies"],
                     json=playload,
                     stream=True,
-                    timeout=llm_kwargs["timeout"],
+                    timeout=int(llm_kwargs["timeout"]),
                 )
             else:
                 response = requests.post(
@@ -141,14 +142,14 @@ def predict(
                     headers=headers,
                     json=playload,
                     stream=True,
-                    timeout=llm_kwargs["timeout"],
+                    timeout=int(llm_kwargs["timeout"]),
                 )
             break
         except:
             retry += 1
             logging.error(f"Request failed, retrying {retry}/{llm_kwargs['max_retry']}")
             yield f"Request failed, retrying {retry}/{llm_kwargs['max_retry']}"
-            if retry > llm_kwargs["max_retry"]:
+            if retry > int(llm_kwargs["max_retry"]):
                 raise TimeoutError
 
     gpt_replying_buffer = ""

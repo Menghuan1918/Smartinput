@@ -1,10 +1,20 @@
 import sys
 import subprocess
-from PyQt6.QtGui import QCursor, QCloseEvent, QIcon, QPixmap, QAction, QFont
+from PyQt6.QtGui import (
+    QCursor,
+    QCloseEvent,
+    QIcon,
+    QPixmap,
+    QAction,
+    QFont,
+    QClipboard,
+    QFocusEvent,
+)
 from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QMessageBox
 from PyQt6.QtCore import QTimer, Qt, QTranslator, QLocale
 import os
 from Get_Config import read_config_file
+from Chat_LLM import predict
 
 
 class TextSelectionMonitor(QLabel):
@@ -69,6 +79,8 @@ class TextSelectionMonitor(QLabel):
         self.tray_icon.setContextMenu(self.menu)
         self.update_menu()
 
+        self.wait_cursor = 0
+
     def toggle_monitoring(self):
         self.is_monitoring = not self.is_monitoring
         self.update_menu()
@@ -94,22 +106,63 @@ class TextSelectionMonitor(QLabel):
                 .decode("utf-8")
                 .strip()
             )
-            if selected_text != self.previous_text:
+            if not self.is_monitoring:
+                return
+            if self.wait_cursor < 3:
+                self.wait_cursor += 1
+                return
+            if selected_text != self.previous_text and self.wait_cursor >= 3:
+                self.wait_cursor = 0
                 self.previous_text = selected_text
-                processed_text = self.deal(selected_text)
-                if processed_text:
-                    self.setText(processed_text)
-                    self.adjustSize()
-                    self.move(QCursor.pos())
-                    self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
-                    self.show()
-                else:
-                    self.hide()
+                self.show()
+                self.setText(self.tr("正在处理..."))
+                self.adjustSize()
+                self.move(QCursor.pos())
+                self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+                self.show()
+                processed_text = ""
+                for processed_text_temp in self.deal(selected_text):
+                    processed_text += processed_text_temp
+                    #! If use stream the window size will be changed too fast....
+                    # self.setText(processed_text)
+                    # self.adjustSize()
+                self.setText(self.final_text(processed_text))
+                self.adjustSize()
         except subprocess.CalledProcessError:
             self.hide()
 
     def deal(self, text):
-        return f"Processed: {text}"
+        system_prompt = config[self.current_mode[-1:]]
+        for get_text in predict(
+            inputs=text, llm_kwargs=config, history=[], system_prompt=system_prompt
+        ):
+            yield get_text
+
+    def final_text(self, text):
+        lines = text.split("\n")
+        processed_lines = []
+        for line in lines:
+            if len(line) <= 75:
+                processed_lines.append(line)
+            else:
+                words = line.split()
+                current_line = ""
+                for word in words:
+                    if len(current_line + word) <= 75:
+                        current_line += word + " "
+                    else:
+                        processed_lines.append(current_line.strip())
+                        current_line = word + " "
+                if current_line:
+                    processed_lines.append(current_line.strip())
+        return "\n".join(processed_lines)
+
+    def mousePressEvent(self, event):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.text())
+
+    def focusOutEvent(self, event: QFocusEvent):
+        self.hide()
 
 
 if __name__ == "__main__":
