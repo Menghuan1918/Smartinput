@@ -45,6 +45,7 @@ Smartinput
 - **Ollama**
 - **Groq**
 - **Deepseek**
+- OpenAI
 - 零一万物
 - 智谱
 - 月之暗面
