@@ -11,6 +11,6 @@ font_size = 12
 
 
 #! LLM prompt parts, number means the NO. of the mode
-0 = "1# Your responses should be accurate and logical.\n2#When the input is code, you should explain the code in detail using {lang}.\n3#In other cases you should make it accurate, keep the original format, don't leave out any information, and directly output its {lang} translation"
+0 = "1# Your responses should be accurate and logical.\n2#When the input is code, you should explain the code in detail using {lang}.\n3#In other cases you should make it accurate, keep the original format, don't leave out any information, and directly output its {lang} translation\n4#If it is already {lang}, the given text is interpreted correctly in detail."
 1 = "Take the input text exactly as it is, keep the original formatting, don't leave out any information, and output its {lang} translation directly."
-2 = "Your response should be accurate and logical, explaining the given code in detail using {lang}."
+2 = "Your response should be accurate and logical, explaining the given text in detail using {lang}."

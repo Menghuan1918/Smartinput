@@ -52,7 +52,7 @@ class TextSelectionMonitor(QLabel):
         self.mode1_action.setCheckable(True)
         self.mode1_action.triggered.connect(lambda: self.set_mode("Mode 1"))
 
-        self.mode2_action = QAction(self.tr("代码解析"), self)
+        self.mode2_action = QAction(self.tr("解析文本"), self)
         self.mode2_action.setCheckable(True)
         self.mode2_action.triggered.connect(lambda: self.set_mode("Mode 2"))
 
@@ -98,7 +98,6 @@ class TextSelectionMonitor(QLabel):
                 self.previous_text = selected_text
                 processed_text = self.deal(selected_text)
                 if processed_text:
-                    print(processed_text)
                     self.setText(processed_text)
                     self.adjustSize()
                     self.move(QCursor.pos())
