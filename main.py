@@ -1,17 +1,8 @@
 import sys
 import subprocess
-from PyQt6.QtGui import (
-    QCursor,
-    QCloseEvent,
-    QIcon,
-    QPixmap,
-    QAction,
-    QFont,
-    QClipboard,
-    QFocusEvent,
-)
-from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QMessageBox
-from PyQt6.QtCore import QTimer, Qt, QTranslator, QLocale
+from PyQt6.QtGui import QCursor, QIcon, QAction, QFont
+from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu
+from PyQt6.QtCore import QTimer, Qt, QTranslator
 import os
 from Get_Config import read_config_file
 from Chat_LLM import predict
@@ -132,11 +123,11 @@ class TextSelectionMonitor(QLabel):
 
         try:
             lang_dict = {
-                'en_US': 'English',
-                'zh_CN': 'Simplified Chinese',
-                'fr_FR': 'French',
-                'es_ES': 'Spanish',
-                'ja_JP': 'Japanese',
+                "en_US": "English",
+                "zh_CN": "Simplified Chinese",
+                "fr_FR": "French",
+                "es_ES": "Spanish",
+                "ja_JP": "Japanese",
             }
             system_prompt = config[self.current_mode[-1:]]
             lang = lang_dict.get(config["lang"], "English")
@@ -215,6 +206,7 @@ class TextSelectionMonitor(QLabel):
                 self.text(),
                 QSystemTrayIcon.MessageIcon.Information,
             )
+
 
 if __name__ == "__main__":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
