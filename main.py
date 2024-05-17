@@ -36,6 +36,7 @@ class TextSelectionMonitor(QLabel):
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(QIcon("icon.png"))
         self.tray_icon.setVisible(True)
+        self.tray_icon.setToolTip("Smartinput")
 
         self.is_monitoring = True
         self.current_mode = "Mode 0"
@@ -43,6 +44,8 @@ class TextSelectionMonitor(QLabel):
         self.create_menu()
 
         self.previous_text = self.get_selected_text()
+        self.lastMoveTime = 0
+        self.moveInterval = 200
 
     def create_menu(self):
         self.menu = QMenu()
@@ -128,7 +131,17 @@ class TextSelectionMonitor(QLabel):
         processed_text = ""
 
         try:
-            for processed_text_temp in self.deal(selected_text):
+            lang_dict = {
+                'en_US': 'English',
+                'zh_CN': 'Simplified Chinese',
+                'fr_FR': 'French',
+                'es_ES': 'Spanish',
+                'ja_JP': 'Japanese',
+            }
+            system_prompt = config[self.current_mode[-1:]]
+            lang = lang_dict.get(config["lang"], "English")
+            system_prompt = system_prompt.format(lang=lang)
+            for processed_text_temp in self.deal(selected_text, system_prompt):
                 processed_text += processed_text_temp
                 #! If use stream the window size will be changed too fast....
                 # self.setText(processed_text)
@@ -142,8 +155,7 @@ class TextSelectionMonitor(QLabel):
             self.timer.start(500)
             return
 
-    def deal(self, text):
-        system_prompt = config[self.current_mode[-1:]]
+    def deal(self, text, system_prompt):
         for get_text in predict(
             inputs=text, llm_kwargs=config, history=[], system_prompt=system_prompt
         ):
@@ -185,23 +197,31 @@ class TextSelectionMonitor(QLabel):
             self.hide()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.MouseButton.LeftButton:
+        currentTime = event.timestamp()
+        if (
+            event.buttons() & Qt.MouseButton.LeftButton
+            and (currentTime - self.lastMoveTime) > self.moveInterval
+        ):
             self.move(event.globalPosition().toPoint() - self.dragPosition)
+            self.lastMoveTime = currentTime
             event.accept()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
+        if event.button() == Qt.MouseButton.MiddleButton:
             clipboard = QApplication.clipboard()
             clipboard.setText(self.text())
-
+            self.tray_icon.showMessage(
+                self.tr("已复制到剪贴板"),
+                self.text(),
+                QSystemTrayIcon.MessageIcon.Information,
+            )
 
 if __name__ == "__main__":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
     app = QApplication(sys.argv)
     translator = QTranslator()
-    print(QLocale.system().name())
     config = read_config_file()
-    locale = config["lang"][2:]
+    locale = config["lang"][:2]
     if translator.load(f"translations_{locale}.qm"):
         app.installTranslator(translator)
     monitor = TextSelectionMonitor(config=config)
