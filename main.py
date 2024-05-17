@@ -1,6 +1,6 @@
 import sys
 import subprocess
-from PyQt6.QtGui import QCursor, QCloseEvent, QIcon, QPixmap, QAction
+from PyQt6.QtGui import QCursor, QCloseEvent, QIcon, QPixmap, QAction, QFont
 from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QMessageBox
 from PyQt6.QtCore import QTimer, Qt, QTranslator, QLocale
 import os
@@ -16,6 +16,7 @@ class TextSelectionMonitor(QLabel):
             | Qt.WindowType.WindowStaysOnTopHint
         )
         self.hide()
+        self.setFont(QFont(config["font"], int(config["font_size"])))
 
         # Check selection every 500ms
         self.timer = QTimer()

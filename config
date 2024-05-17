@@ -6,3 +6,5 @@ endpoint = "http://localhost:11434/v1/chat/completion"
 proxies = {}
 timeout = 60
 max_retry = 3
+font = "DejaVu Sans"
+font_size = 12s
