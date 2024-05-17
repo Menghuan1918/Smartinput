@@ -42,7 +42,7 @@ class TextSelectionMonitor(QLabel):
 
         self.create_menu()
 
-        self.previous_text = ""
+        self.previous_text = self.get_selected_text()
 
     def create_menu(self):
         self.menu = QMenu()
@@ -83,6 +83,10 @@ class TextSelectionMonitor(QLabel):
 
     def toggle_monitoring(self):
         self.is_monitoring = not self.is_monitoring
+        if self.is_monitoring:
+            self.timer.start(500)
+        else:
+            self.timer.stop()
         self.update_menu()
 
     def set_mode(self, mode):
@@ -101,35 +105,42 @@ class TextSelectionMonitor(QLabel):
 
     def check_selection(self):
         try:
-            selected_text = (
-                subprocess.check_output(["xclip", "-o", "-selection", "primary"])
-                .decode("utf-8")
-                .strip()
-            )
-            if not self.is_monitoring:
-                return
-            if self.wait_cursor < 3:
+            selected_text = ()
+            if self.wait_cursor < 5:
                 self.wait_cursor += 1
                 return
-            if selected_text != self.previous_text and self.wait_cursor >= 3:
-                self.wait_cursor = 0
-                self.previous_text = selected_text
-                self.show()
-                self.setText(self.tr("正在处理..."))
-                self.adjustSize()
-                self.move(QCursor.pos())
-                self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
-                self.show()
-                processed_text = ""
-                for processed_text_temp in self.deal(selected_text):
-                    processed_text += processed_text_temp
-                    #! If use stream the window size will be changed too fast....
-                    # self.setText(processed_text)
-                    # self.adjustSize()
-                self.setText(self.final_text(processed_text))
-                self.adjustSize()
+            selected_text = self.get_selected_text()
+            if selected_text != self.previous_text:
+                self.set_text(selected_text)
         except subprocess.CalledProcessError:
             self.hide()
+
+    def set_text(self, selected_text):
+        self.timer.stop()
+        self.wait_cursor = 0
+        self.previous_text = selected_text
+        self.show()
+        self.move(QCursor.pos())
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+        self.setText(str(self.tr("正在处理...")))
+        self.adjustSize()
+        QApplication.processEvents()
+        processed_text = ""
+
+        try:
+            for processed_text_temp in self.deal(selected_text):
+                processed_text += processed_text_temp
+                #! If use stream the window size will be changed too fast....
+                # self.setText(processed_text)
+                # self.adjustSize()
+            self.setText(self.final_text(processed_text))
+            self.adjustSize()
+            self.timer.start(500)
+        except Exception as e:
+            self.setText(str(e))
+            self.adjustSize()
+            self.timer.start(500)
+            return
 
     def deal(self, text):
         system_prompt = config[self.current_mode[-1:]]
@@ -142,13 +153,13 @@ class TextSelectionMonitor(QLabel):
         lines = text.split("\n")
         processed_lines = []
         for line in lines:
-            if len(line) <= 75:
+            if len(line) <= 100:
                 processed_lines.append(line)
             else:
                 words = line.split()
                 current_line = ""
                 for word in words:
-                    if len(current_line + word) <= 75:
+                    if len(current_line + word) <= 100:
                         current_line += word + " "
                     else:
                         processed_lines.append(current_line.strip())
@@ -157,12 +168,31 @@ class TextSelectionMonitor(QLabel):
                     processed_lines.append(current_line.strip())
         return "\n".join(processed_lines)
 
-    def mousePressEvent(self, event):
-        clipboard = QApplication.clipboard()
-        clipboard.setText(self.text())
+    def get_selected_text(self):
+        return (
+            subprocess.check_output(["xclip", "-o", "-selection", "primary"])
+            .decode("utf-8")
+            .strip()
+        )
 
-    def focusOutEvent(self, event: QFocusEvent):
-        self.hide()
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragPosition = (
+                event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            )
+            event.accept()
+        elif event.button() == Qt.MouseButton.RightButton:
+            self.hide()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.dragPosition)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(self.text())
 
 
 if __name__ == "__main__":
