@@ -130,7 +130,7 @@ class TextSelectionMonitor(QLabel):
                 "ja_JP": "Japanese",
             }
             system_prompt = config[self.current_mode[-1:]]
-            lang = lang_dict.get(config["lang"], "English")
+            lang = lang_dict.get(config["lang"][:5], "English")
             system_prompt = system_prompt.format(lang=lang)
             for processed_text_temp in self.deal(selected_text, system_prompt):
                 processed_text += processed_text_temp
