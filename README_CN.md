@@ -63,11 +63,11 @@ Smartinput
 - max_retry：最大重试次数，默认3次
 - font：使用的字体，默认为DejaVu Sans
 - font_size：使用的字号，默认为12
-- lang：检测的语言环境，第一次启动时会自动识别。你也可以在其后进行更改
+- lang：检测的语言环境，第一次启动时会自动识别。你也可以在其后进行更改,**软件界面和回答目标语言会遵循这个设置。**
 
 # 使用
 > [!IMPORTANT]
-> 由于使用了`xclip`，其不支持读取wayland窗口中选中的文本！此外使用前请先安装`xclip`：
+> 由于使用了`xclip`，其不支持读取**wayland**窗口中选中的文本！此外使用前请先安装`xclip`：
 > 
 > Ubuntu/Debian:`sudo apt install xclip`
 > 
