@@ -1,0 +1,8 @@
+APIKEY = ""
+llm_model = "llama3"
+max_tokens = 8000
+temperature = 0.3
+endpoint = "http://localhost:11434/v1/chat/completion"
+proxies = {}
+timeout = 60
+max_retry = 3

@@ -1,6 +1,7 @@
 import os
 import logging
 import shutil
+
 def read_config_file():
     config_file_path = '~/.smartinput/config'
     config = {}
@@ -14,8 +15,11 @@ def read_config_file():
                     logging.info(f"Read config: {key}={value}")
     except FileNotFoundError:
         logging.error(f"Config file not found: {config_file_path}, copy the default config to {config_file_path}")
+        lang = os.environ.get('LANG', 'en_US')
         os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
         shutil.copy("config", config_file_path)
+        with open(config_file_path, 'a') as file:
+            file.write(f"lang={lang}\n")
         logging.info(f"Default config file copied to: {config_file_path}")
         config = read_config_file()
     except Exception as e:

@@ -4,10 +4,11 @@ from PyQt6.QtGui import QCursor, QCloseEvent, QIcon, QPixmap, QAction
 from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QMessageBox
 from PyQt6.QtCore import QTimer, Qt, QTranslator, QLocale
 import os
+from .Get_Config import read_config_file
 
 
 class TextSelectionMonitor(QLabel):
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
         self.setWindowFlags(
             Qt.WindowType.ToolTip
@@ -116,8 +117,9 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     translator = QTranslator()
     print(QLocale.system().name())
-    locale = QLocale.system().name()[:2]
+    config = read_config_file()
+    locale = config["lang"][2:]
     if translator.load(f"translations_{locale}.qm"):
         app.installTranslator(translator)
-    monitor = TextSelectionMonitor()
+    monitor = TextSelectionMonitor(config=config)
     sys.exit(app.exec())
