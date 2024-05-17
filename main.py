@@ -6,6 +6,7 @@ from PyQt6.QtCore import QTimer, Qt, QTranslator
 import os
 from Get_Config import read_config_file
 from Chat_LLM import predict
+import logging
 
 
 class TextSelectionMonitor(QLabel):
@@ -210,6 +211,12 @@ class TextSelectionMonitor(QLabel):
 
 if __name__ == "__main__":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
+    os.makedirs(os.path.expanduser("./log"), exist_ok=True)
+    logging.basicConfig(
+        filename=os.path.expanduser("./log/smartinput.log"),
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+    )
     app = QApplication(sys.argv)
     translator = QTranslator()
     config = read_config_file()
