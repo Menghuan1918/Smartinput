@@ -42,21 +42,21 @@ class TextSelectionMonitor(QLabel):
         self.menu = QMenu()
 
         # Toggle monitoring action
-        self.toggle_action = QAction(self.tr("开关划线取词"), self)
+        self.toggle_action = QAction(self.tr("Text selection ON/OFF"), self)
         self.toggle_action.triggered.connect(self.toggle_monitoring)
         self.menu.addAction(self.toggle_action)
 
         # Mode selection submenu
-        self.mode_menu = QMenu(self.tr("响应模式选择"), self)
-        self.mode0_action = QAction(self.tr("智能解析"), self)
+        self.mode_menu = QMenu(self.tr("Response mode selection"), self)
+        self.mode0_action = QAction(self.tr("Intelligent parsing"), self)
         self.mode0_action.setCheckable(True)
         self.mode0_action.triggered.connect(lambda: self.set_mode("Mode 0"))
 
-        self.mode1_action = QAction(self.tr("翻译文本"), self)
+        self.mode1_action = QAction(self.tr("Translated text"), self)
         self.mode1_action.setCheckable(True)
         self.mode1_action.triggered.connect(lambda: self.set_mode("Mode 1"))
 
-        self.mode2_action = QAction(self.tr("解析文本"), self)
+        self.mode2_action = QAction(self.tr("Parse text"), self)
         self.mode2_action.setCheckable(True)
         self.mode2_action.triggered.connect(lambda: self.set_mode("Mode 2"))
 
@@ -66,7 +66,7 @@ class TextSelectionMonitor(QLabel):
         self.menu.addMenu(self.mode_menu)
 
         # Exit action
-        exit_action = QAction(self.tr("退出"), self)
+        exit_action = QAction(self.tr("Quit"), self)
         exit_action.triggered.connect(QApplication.instance().quit)
         self.menu.addAction(exit_action)
 
@@ -89,9 +89,9 @@ class TextSelectionMonitor(QLabel):
 
     def update_menu(self):
         self.toggle_action.setText(
-            self.tr("开启划线取词")
+            self.tr("Trun on text selection")
             if not self.is_monitoring
-            else self.tr("关闭划线取词")
+            else self.tr("Trun off text selection")
         )
         self.mode0_action.setChecked(self.current_mode == "Mode 0")
         self.mode1_action.setChecked(self.current_mode == "Mode 1")
@@ -116,7 +116,7 @@ class TextSelectionMonitor(QLabel):
         self.show()
         self.move(QCursor.pos())
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
-        self.setText(str(self.tr("正在处理...")))
+        self.setText(str(self.tr("Process...Please wait")))
         self.adjustSize()
         QApplication.processEvents()
         processed_text = ""
@@ -202,7 +202,7 @@ class TextSelectionMonitor(QLabel):
             clipboard = QApplication.clipboard()
             clipboard.setText(self.text())
             self.tray_icon.showMessage(
-                self.tr("已复制到剪贴板"),
+                self.tr("Copied to clipboard"),
                 self.text(),
                 QSystemTrayIcon.MessageIcon.Information,
             )
