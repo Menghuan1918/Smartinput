@@ -1,8 +1,6 @@
 # 借鉴了 https://github.com/binary-husky/gpt_academic 项目
 import json
-import time
 import logging
-import traceback
 import requests
 
 timeout_bot_msg = "Time out! Please try again later."
