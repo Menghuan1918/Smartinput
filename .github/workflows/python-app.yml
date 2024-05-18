@@ -25,7 +25,9 @@ jobs:
         python-version: "3.12"
         cache: 'pip'
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+        pip install pyinstaller
+        pip install -r requirements.txt
     - name: Packge the app
       run: |
         pyinstaller -w main.py
