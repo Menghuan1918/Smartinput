@@ -20,14 +20,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.12"
+        cache: 'pip'
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      run: pip install -r requirements.txt
     - name: Packge the app
       run: |
         pyinstaller -w main.py
@@ -36,12 +34,13 @@ jobs:
         cp LICENSE ./dist/main
         cp Refresh_Desktopfile.sh ./dist/main
         cp translations_zh.qm ./dist/main
-        tar -czvf Smartinput.tar.gz ./dist/main
+        cd ./dist
+        tar -czvf Smartinput.tar.gz ./main
         sha256sum Smartinput.tar.gz > sha256sum.txt
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-          name: code-coverage-report
+          name: Auto_Packge_Smartinput
           path: |
-            Smartinput.tar.gz
-            sha256sum.txt
+            ./dist/Smartinput.tar.gz
+            ./dist/sha256sum.txt
