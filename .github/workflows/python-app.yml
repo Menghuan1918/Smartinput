@@ -35,7 +35,7 @@ jobs:
         cp icon.png ./dist/main
         cp LICENSE ./dist/main
         cp Refresh_Desktopfile.sh ./dist/main
-        cp translations_zh.qm
+        cp translations_zh.qm ./dist/main
         tar -czvf Smartinput.tar.gz ./dist/main
         sha256sum Smartinput.tar.gz > sha256sum.txt
     - name: Upload artifact
