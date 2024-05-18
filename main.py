@@ -173,11 +173,15 @@ class TextSelectionMonitor(QLabel):
         return "\n".join(processed_lines)
 
     def get_selected_text(self):
-        return (
-            subprocess.check_output(["xclip", "-o", "-selection", "primary"])
-            .decode("utf-8")
-            .strip()
-        )
+        try:
+            text = (
+                subprocess.check_output(["xclip", "-o", "-selection", "primary"])
+                .decode("utf-8")
+                .strip()
+            )
+        except:
+            text = ""
+        return text
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
