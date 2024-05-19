@@ -10,6 +10,7 @@ from PyQt6.QtCore import (
     QThreadPool,
     QRunnable,
     QObject,
+    QPoint
 )
 import os
 from Get_Config import read_config_file
@@ -157,14 +158,17 @@ class TextSelectionMonitor(QLabel):
             return
 
     def process_button(self, selected_text):
-        self.button = QPushButton("Show Text")
-        self.button.setGeometry(0, 0, 100, 30)
-        self.button.move(QCursor.pos())
+        self.button = QPushButton("Go")
+        self.button.setGeometry(0, 0, 30, 30)
+        self.button.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.button.setWindowOpacity(0.8)
+        self.button.move(QCursor.pos() + QPoint(15, -25))
         self.button.show()
         self.button.clicked.connect(lambda: self.set_text(selected_text))
+        self.button.clicked.connect(self.button.hide)
         self.timer_button = QTimer()
         self.timer_button.timeout.connect(self.hide_process_button)
-        self.timer_button.start(3000)
+        self.timer_button.start(5000)
 
     def hide_process_button(self):
         self.button.hide()
