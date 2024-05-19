@@ -54,10 +54,11 @@ class TextSelectionMonitor(QLabel):
         self.hide()
         self.setFont(QFont(config["font"], int(config["font_size"])))
 
-        # Check selection every 500ms
+        # Check selection every 1000ms
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_selection)
-        self.timer.start(500)
+        self.timer.start(1000)
+        self.process_flag = False
         self.threadpool = QThreadPool()
 
         self.tray_icon = QSystemTrayIcon(self)
@@ -116,7 +117,7 @@ class TextSelectionMonitor(QLabel):
         self.is_monitoring = not self.is_monitoring
         if self.is_monitoring:
             if not self.timer.isActive():
-                self.timer.start(500)
+                self.timer.start(1000)
         else:
             self.timer.stop()
         self.update_menu()
@@ -127,15 +128,17 @@ class TextSelectionMonitor(QLabel):
 
     def update_menu(self):
         self.toggle_action.setText(
-            self.tr("Trun on text selection")
+            self.tr("Turn on text selection")
             if not self.is_monitoring
-            else self.tr("Trun off text selection")
+            else self.tr("Turn off text selection")
         )
         self.mode0_action.setChecked(self.current_mode == "Mode 0")
         self.mode1_action.setChecked(self.current_mode == "Mode 1")
         self.mode2_action.setChecked(self.current_mode == "Mode 2")
 
     def check_selection(self):
+        if not self.is_monitoring or self.process_flag:
+            return
         selected_text = ""
         try:
             if self.wait_cursor < 2:
@@ -151,7 +154,7 @@ class TextSelectionMonitor(QLabel):
             return
 
     def set_text(self, selected_text):
-        self.timer.stop()
+        self.process_flag = True
         self.wait_cursor = 0
         self.previous_text = selected_text
         self.show()
@@ -168,6 +171,7 @@ class TextSelectionMonitor(QLabel):
         system_prompt = config[self.current_mode[-1:]]
         lang = lang_dict.get(config["lang"][:5], "English")
         system_prompt = system_prompt.format(lang=lang)
+        self.get_text = ""
         Chat_LLM_thread = Chat_LLM(selected_text, system_prompt, config)
         Chat_LLM_thread.text_get.text_get.connect(self.update_text)
         self.threadpool.start(Chat_LLM_thread)
@@ -180,7 +184,7 @@ class TextSelectionMonitor(QLabel):
             logging.info(f"[Get text]: {self.get_text}")
             self.setText(self.get_text)
             self.adjustSize()
-            self.timer.start(500)
+            self.process_flag = False
 
     def final_text(self, text):
         lines = text.split("\n")
@@ -199,14 +203,20 @@ class TextSelectionMonitor(QLabel):
                         current_line = word + " "
                 if current_line:
                     processed_lines.append(current_line.strip())
-        return "\n".join(processed_lines)
+        return " \n ".join(processed_lines)
 
     def get_selected_text(self):
-        text = (
-            subprocess.check_output(["xclip", "-o", "-selection", "clipboard"])
-            .decode("utf-8")
-            .strip()
-        )
+        try:
+            text = (
+                subprocess.check_output(["xclip", "-o", "-selection", "clipboard"])
+                .decode("utf-8")
+                .strip()
+            )
+        except:
+            try:
+                text = self.previous_text
+            except:
+                text = ""
         # Get primary selection first
         try:
             primary_text = (
@@ -242,13 +252,12 @@ class TextSelectionMonitor(QLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.MiddleButton:
             clipboard = QApplication.clipboard()
-            clipboard.setText(self.text())
+            clipboard.setText(self.get_text)
             self.tray_icon.showMessage(
                 self.tr("Copied to clipboard"),
-                self.text(),
+                self.get_text,
                 QSystemTrayIcon.MessageIcon.Information,
             )
-
 
 if __name__ == "__main__":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
