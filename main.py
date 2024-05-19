@@ -1,7 +1,7 @@
 import sys
 import subprocess
 from PyQt6.QtGui import QCursor, QIcon, QAction, QFont
-from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu
+from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QPushButton
 from PyQt6.QtCore import (
     QTimer,
     Qt,
@@ -146,17 +146,32 @@ class TextSelectionMonitor(QLabel):
             else:
                 selected_text = self.get_selected_text()
                 if selected_text != self.previous_text:
-                    self.set_text(selected_text)
+                    self.previous_text = selected_text
+                    self.process_button(selected_text)
+
+                    # self.set_text(selected_text)
             return
         except Exception as e:
             logging.error(e)
             self.set_text(e)
             return
 
+    def process_button(self, selected_text):
+        self.button = QPushButton("Show Text")
+        self.button.setGeometry(0, 0, 100, 30)
+        self.button.move(QCursor.pos())
+        self.button.show()
+        self.button.clicked.connect(lambda: self.set_text(selected_text))
+        self.timer_button = QTimer()
+        self.timer_button.timeout.connect(self.hide_process_button)
+        self.timer_button.start(3000)
+
+    def hide_process_button(self):
+        self.button.hide()
+
     def set_text(self, selected_text):
         self.process_flag = True
         self.wait_cursor = 0
-        self.previous_text = selected_text
         self.show()
         self.move(QCursor.pos())
         self.setText(str(self.tr("Process...Please wait")))
