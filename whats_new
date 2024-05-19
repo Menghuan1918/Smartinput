@@ -1,5 +1,5 @@
-[由GitHub Action自动生成并发布]
-改进流畅度，将文本处理放置在后台线程中
+新增监听模式:混合/剪切板/鼠标选择文本
+新增处理模式：直接处理/弹窗二次确认
 
-[Automatically generated and published by GitHub Action]
-Improved fluency, put text processing in the background thread
+New listening Mode Selection:Mixed/Clipboard/Mouse Selection of Text
+New processing Mode Selection:Direct processing/pop-up secondary confirmation

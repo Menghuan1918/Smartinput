@@ -33,6 +33,13 @@ Here's a paragraph from GPT-4o's introductory page about the desktop client, wit
 > [!NOTE]
 > Unless otherwise noted, all videos or images shown are on **3060M** mobile graphics cards running **llama3-8B** on ollama, and the videos are not **accelerated or multiplied**!
 
+# What's new
+- Listening Mode Selection
+
+  ![Select](https://github.com/Menghuan1918/Smartinput/assets/122662527/44da57e6-fea5-42bd-b677-e5b667784ea9)
+- Processing mode selection:Direct processing/pop-up secondary confirmation
+  
+  ![Go](https://github.com/Menghuan1918/Smartinput/assets/122662527/a6823094-0da4-4558-8630-d9dd178f502b)
 
 # Functions
 Sit-click window to drag and drop, middle-click window to copy content, right-click window to hide, tray menu for mode switching.
