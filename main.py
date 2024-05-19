@@ -2,11 +2,45 @@ import sys
 import subprocess
 from PyQt6.QtGui import QCursor, QIcon, QAction, QFont
 from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu
-from PyQt6.QtCore import QTimer, Qt, QTranslator
+from PyQt6.QtCore import (
+    QTimer,
+    Qt,
+    QTranslator,
+    pyqtSignal,
+    QThreadPool,
+    QRunnable,
+    QObject,
+)
 import os
 from Get_Config import read_config_file
 from Chat_LLM import predict
 import logging
+
+
+class Chat_LLM_Single(QObject):
+    text_get = pyqtSignal(str, bool)
+
+
+class Chat_LLM(QRunnable):
+    def __init__(self, text, system_prompt, config):
+        super(Chat_LLM, self).__init__()
+        self.text = text
+        self.system_prompt = system_prompt
+        self.config = config
+        self.text_get = Chat_LLM_Single()
+
+    def run(self):
+        try:
+            for get_text in predict(
+                inputs=self.text,
+                llm_kwargs=self.config,
+                history=[],
+                system_prompt=self.system_prompt,
+            ):
+                self.text_get.text_get.emit(get_text, True)
+        except Exception as e:
+            self.text_get.text_get.emit(str(e), False)
+        self.text_get.text_get.emit("", False)
 
 
 class TextSelectionMonitor(QLabel):
@@ -24,6 +58,7 @@ class TextSelectionMonitor(QLabel):
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_selection)
         self.timer.start(500)
+        self.threadpool = QThreadPool()
 
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(QIcon("icon.png"))
@@ -36,8 +71,9 @@ class TextSelectionMonitor(QLabel):
         self.create_menu()
 
         self.previous_text = self.get_selected_text()
+        self.get_text = ""
         self.lastMoveTime = 0
-        self.moveInterval = 200
+        self.moveInterval = 100
 
     def create_menu(self):
         self.menu = QMenu()
@@ -79,7 +115,8 @@ class TextSelectionMonitor(QLabel):
     def toggle_monitoring(self):
         self.is_monitoring = not self.is_monitoring
         if self.is_monitoring:
-            self.timer.start(500)
+            if not self.timer.isActive():
+                self.timer.start(500)
         else:
             self.timer.stop()
         self.update_menu()
@@ -99,16 +136,19 @@ class TextSelectionMonitor(QLabel):
         self.mode2_action.setChecked(self.current_mode == "Mode 2")
 
     def check_selection(self):
+        selected_text = ""
         try:
-            selected_text = ()
-            if self.wait_cursor < 5:
+            if self.wait_cursor < 2:
                 self.wait_cursor += 1
-                return
-            selected_text = self.get_selected_text()
-            if selected_text != self.previous_text:
-                self.set_text(selected_text)
-        except subprocess.CalledProcessError:
-            self.hide()
+            else:
+                selected_text = self.get_selected_text()
+                if selected_text != self.previous_text:
+                    self.set_text(selected_text)
+            return
+        except Exception as e:
+            logging.error(e)
+            self.set_text(e)
+            return
 
     def set_text(self, selected_text):
         self.timer.stop()
@@ -116,54 +156,43 @@ class TextSelectionMonitor(QLabel):
         self.previous_text = selected_text
         self.show()
         self.move(QCursor.pos())
-        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
         self.setText(str(self.tr("Process...Please wait")))
         self.adjustSize()
-        QApplication.processEvents()
-        processed_text = ""
+        lang_dict = {
+            "en_US": "English",
+            "zh_CN": "Simplified Chinese",
+            "fr_FR": "French",
+            "es_ES": "Spanish",
+            "ja_JP": "Japanese",
+        }
+        system_prompt = config[self.current_mode[-1:]]
+        lang = lang_dict.get(config["lang"][:5], "English")
+        system_prompt = system_prompt.format(lang=lang)
+        Chat_LLM_thread = Chat_LLM(selected_text, system_prompt, config)
+        Chat_LLM_thread.text_get.text_get.connect(self.update_text)
+        self.threadpool.start(Chat_LLM_thread)
 
-        try:
-            lang_dict = {
-                "en_US": "English",
-                "zh_CN": "Simplified Chinese",
-                "fr_FR": "French",
-                "es_ES": "Spanish",
-                "ja_JP": "Japanese",
-            }
-            system_prompt = config[self.current_mode[-1:]]
-            lang = lang_dict.get(config["lang"][:5], "English")
-            system_prompt = system_prompt.format(lang=lang)
-            for processed_text_temp in self.deal(selected_text, system_prompt):
-                processed_text += processed_text_temp
-                #! If use stream the window size will be changed too fast....
-                # self.setText(processed_text)
-                # self.adjustSize()
-            self.setText(self.final_text(processed_text))
+    def update_text(self, text, flag):
+        if flag:
+            self.get_text += text
+            #! This is because if directly set text, the window size will change too much
+        else:
+            logging.info(f"[Get text]: {self.get_text}")
+            self.setText(self.get_text)
             self.adjustSize()
             self.timer.start(500)
-        except Exception as e:
-            self.setText(str(e))
-            self.adjustSize()
-            self.timer.start(500)
-            return
-
-    def deal(self, text, system_prompt):
-        for get_text in predict(
-            inputs=text, llm_kwargs=config, history=[], system_prompt=system_prompt
-        ):
-            yield get_text
 
     def final_text(self, text):
         lines = text.split("\n")
         processed_lines = []
         for line in lines:
-            if len(line) <= 100:
+            if len(line) <= 50:
                 processed_lines.append(line)
             else:
                 words = line.split()
                 current_line = ""
                 for word in words:
-                    if len(current_line + word) <= 100:
+                    if len(current_line + word) <= 50:
                         current_line += word + " "
                     else:
                         processed_lines.append(current_line.strip())
@@ -173,14 +202,22 @@ class TextSelectionMonitor(QLabel):
         return "\n".join(processed_lines)
 
     def get_selected_text(self):
+        text = (
+            subprocess.check_output(["xclip", "-o", "-selection", "clipboard"])
+            .decode("utf-8")
+            .strip()
+        )
+        # Get primary selection first
         try:
-            text = (
+            primary_text = (
                 subprocess.check_output(["xclip", "-o", "-selection", "primary"])
                 .decode("utf-8")
                 .strip()
             )
+            if primary_text != "":
+                text = primary_text
         except:
-            text = ""
+            pass
         return text
 
     def mousePressEvent(self, event):
