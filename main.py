@@ -10,7 +10,7 @@ from PyQt6.QtCore import (
     QThreadPool,
     QRunnable,
     QObject,
-    QPoint
+    QPoint,
 )
 import os
 from Get_Config import read_config_file
@@ -70,6 +70,7 @@ class TextSelectionMonitor(QLabel):
         self.is_monitoring = True
         self.current_mode = "Mode 0"
         self.current_process_mode = "Pop"
+        self.current_listen_mode = "Mixed"
 
         self.create_menu()
 
@@ -97,6 +98,22 @@ class TextSelectionMonitor(QLabel):
         self.process_mode.addAction(self.process_mode_0)
         self.process_mode.addAction(self.process_mode_1)
         self.menu.addMenu(self.process_mode)
+
+        # Listening modes: Mixed, Clipboard, Mouse Selection
+        self.listen_mode = QMenu(self.tr("Listening mode"), self)
+        self.listen_mode_mixed = QAction(self.tr("Mixed"), self)
+        self.listen_mode_mixed.setCheckable(True)
+        self.listen_mode_mixed.triggered.connect(lambda: self.set_listen_mode("Mixed"))
+        self.listen_mode_clip = QAction(self.tr("Clipboard"), self)
+        self.listen_mode_clip.setCheckable(True)
+        self.listen_mode_clip.triggered.connect(lambda: self.set_listen_mode("Clip"))
+        self.listen_mode_mouse = QAction(self.tr("Mouse Selection"), self)
+        self.listen_mode_mouse.setCheckable(True)
+        self.listen_mode_mouse.triggered.connect(lambda: self.set_listen_mode("Mouse"))
+        self.listen_mode.addAction(self.listen_mode_mixed)
+        self.listen_mode.addAction(self.listen_mode_clip)
+        self.listen_mode.addAction(self.listen_mode_mouse)
+        self.menu.addMenu(self.listen_mode)
 
         # Mode selection submenu
         self.mode_menu = QMenu(self.tr("Response mode selection"), self)
@@ -144,6 +161,10 @@ class TextSelectionMonitor(QLabel):
         self.current_process_mode = mode
         self.update_menu()
 
+    def set_listen_mode(self, mode):
+        self.current_listen_mode = mode
+        self.update_menu()
+
     def update_menu(self):
         self.toggle_action.setText(
             self.tr("Turn on text selection")
@@ -152,6 +173,10 @@ class TextSelectionMonitor(QLabel):
         )
         self.process_mode_0.setChecked(self.current_process_mode == "Pop")
         self.process_mode_1.setChecked(self.current_process_mode == "Direct")
+
+        self.listen_mode_mixed.setChecked(self.current_listen_mode == "Mixed")
+        self.listen_mode_clip.setChecked(self.current_listen_mode == "Clip")
+        self.listen_mode_mouse.setChecked(self.current_listen_mode == "Mouse")
 
         self.mode0_action.setChecked(self.current_mode == "Mode 0")
         self.mode1_action.setChecked(self.current_mode == "Mode 1")
@@ -258,17 +283,20 @@ class TextSelectionMonitor(QLabel):
                 text = self.previous_text
             except:
                 text = ""
-        # Get primary selection first
         try:
             primary_text = (
                 subprocess.check_output(["xclip", "-o", "-selection", "primary"])
                 .decode("utf-8")
                 .strip()
             )
-            if primary_text != "":
-                text = primary_text
         except:
+            primary_text = ""
+        if self.current_listen_mode == "Mixed" and primary_text != "":
+            text = primary_text
+        elif self.current_listen_mode == "Clip":
             pass
+        elif self.current_listen_mode == "Mouse" and primary_text != "":
+            text = primary_text
         return text
 
     def copy_to_clipboard(self, text):
