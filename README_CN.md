@@ -31,6 +31,13 @@ Smartinput
 > [!NOTE]
 > 如无特殊说明，展示的所有视频或者图片均使用**3060M**移动端显卡，在ollama上运行**llama3-8B**，并且视频没有**进行加速或倍速处理**！
 
+# 新功能
+- 新增监听模式
+  
+  ![Select](https://github.com/Menghuan1918/Smartinput/assets/122662527/06a26e02-755f-4622-8f42-fdf33b212e8a)
+- 新增处理模式：直接处理/弹窗二次确认
+
+  ![Go](https://github.com/Menghuan1918/Smartinput/assets/122662527/a6823094-0da4-4558-8630-d9dd178f502b)
 # 功能
 坐键点击窗口拖拽，中键点击窗口复制内容，右键点击窗口隐藏，托盘菜单进行模式切换。
 
