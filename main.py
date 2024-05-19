@@ -69,6 +69,7 @@ class TextSelectionMonitor(QLabel):
 
         self.is_monitoring = True
         self.current_mode = "Mode 0"
+        self.current_process_mode = "Pop"
 
         self.create_menu()
 
@@ -84,6 +85,18 @@ class TextSelectionMonitor(QLabel):
         self.toggle_action = QAction(self.tr("Text selection ON/OFF"), self)
         self.toggle_action.triggered.connect(self.toggle_monitoring)
         self.menu.addAction(self.toggle_action)
+
+        # processing mode: Direct / Pop-up confirmation
+        self.process_mode = QMenu(self.tr("Processing mode"), self)
+        self.process_mode_0 = QAction(self.tr("Pop-up confirmation"), self)
+        self.process_mode_0.setCheckable(True)
+        self.process_mode_0.triggered.connect(lambda: self.set_process_mode("Pop"))
+        self.process_mode_1 = QAction(self.tr("Direct show"), self)
+        self.process_mode_1.setCheckable(True)
+        self.process_mode_1.triggered.connect(lambda: self.set_process_mode("Direct"))
+        self.process_mode.addAction(self.process_mode_0)
+        self.process_mode.addAction(self.process_mode_1)
+        self.menu.addMenu(self.process_mode)
 
         # Mode selection submenu
         self.mode_menu = QMenu(self.tr("Response mode selection"), self)
@@ -127,12 +140,19 @@ class TextSelectionMonitor(QLabel):
         self.current_mode = mode
         self.update_menu()
 
+    def set_process_mode(self, mode):
+        self.current_process_mode = mode
+        self.update_menu()
+
     def update_menu(self):
         self.toggle_action.setText(
             self.tr("Turn on text selection")
             if not self.is_monitoring
             else self.tr("Turn off text selection")
         )
+        self.process_mode_0.setChecked(self.current_process_mode == "Pop")
+        self.process_mode_1.setChecked(self.current_process_mode == "Direct")
+
         self.mode0_action.setChecked(self.current_mode == "Mode 0")
         self.mode1_action.setChecked(self.current_mode == "Mode 1")
         self.mode2_action.setChecked(self.current_mode == "Mode 2")
@@ -142,15 +162,16 @@ class TextSelectionMonitor(QLabel):
             return
         selected_text = ""
         try:
-            if self.wait_cursor < 2:
+            if self.wait_cursor < 3:
                 self.wait_cursor += 1
             else:
                 selected_text = self.get_selected_text()
                 if selected_text != self.previous_text:
                     self.previous_text = selected_text
-                    self.process_button(selected_text)
-
-                    # self.set_text(selected_text)
+                    if self.current_process_mode == "Direct":
+                        self.set_text(selected_text)
+                    else:
+                        self.process_button(selected_text)
             return
         except Exception as e:
             logging.error(e)
