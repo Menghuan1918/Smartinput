@@ -189,14 +189,15 @@ class TextSelectionMonitor(QLabel):
     def final_text(self, text):
         lines = text.split("\n")
         processed_lines = []
+        max_len = 35 if config["lang"][:2] == "zh" else 100
         for line in lines:
-            if len(line) <= 50:
+            if len(line) <= max_len:
                 processed_lines.append(line)
             else:
                 words = line.split()
                 current_line = ""
                 for word in words:
-                    if len(current_line + word) <= 50:
+                    if len(current_line + word) <= max_len:
                         current_line += word + " "
                     else:
                         processed_lines.append(current_line.strip())
@@ -230,6 +231,11 @@ class TextSelectionMonitor(QLabel):
             pass
         return text
 
+    def copy_to_clipboard(self, text):
+        subprocess.Popen(
+            ["xclip", "-selection", "clipboard"], stdin=subprocess.PIPE
+        ).communicate(text.encode("utf-8"))
+
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragPosition = (
@@ -251,13 +257,16 @@ class TextSelectionMonitor(QLabel):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.MiddleButton:
-            clipboard = QApplication.clipboard()
-            clipboard.setText(self.get_text)
             self.tray_icon.showMessage(
                 self.tr("Copied to clipboard"),
-                self.get_text,
+                str(self.get_text),
                 QSystemTrayIcon.MessageIcon.Information,
+                2000,
             )
+            # Copy to clipboard
+            self.copy_to_clipboard(self.get_text)
+            event.accept()
+
 
 if __name__ == "__main__":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
