@@ -90,7 +90,7 @@ python main.py
 ```
 
 # TODO
-- [ ] Improve smoothness
+- [x] Improve smoothness
 - [ ] Allow customised prompts
 - [ ] Shortcut Binding
 - [ ] Wayland support

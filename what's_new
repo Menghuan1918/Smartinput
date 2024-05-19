@@ -1,0 +1,1 @@
+改进流畅度，将文本处理放置在后台线程中 \n \n  Improved fluency, put text processing in the background thread

@@ -86,7 +86,7 @@ pip install -r requirements.txt
 python main.py
 ```
 # TODO
-- [ ] 改进流畅度
+- [x] 改进流畅度
 - [ ] 允许自定义提示词
 - [ ] 快捷键绑定
 - [ ] Wayland支持

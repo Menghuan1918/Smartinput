@@ -46,3 +46,9 @@ jobs:
           path: |
             ./dist/Smartinput.tar.gz
             ./dist/sha256sum.txt
+    - name: Auto push to release
+      run: |
+        cd ..
+        gh release create $(cat version) ./dist/Smartinput.tar.gz ./dist/sha256sum.txt -F ./what's_new
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
