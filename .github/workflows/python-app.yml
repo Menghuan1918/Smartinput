@@ -48,6 +48,6 @@ jobs:
             ./dist/sha256sum.txt
     - name: Auto push to release
       run: |
-        gh release create $(cat version) ./dist/Smartinput.tar.gz ./dist/sha256sum.txt -F "$(cat what's_new)"
+        gh release create $(cat version) ./dist/Smartinput.tar.gz ./dist/sha256sum.txt -F "$(cat whats_new)"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
