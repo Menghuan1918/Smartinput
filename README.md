@@ -38,7 +38,7 @@ Here's a paragraph from GPT-4o's introductory page about the desktop client, wit
   
   ![New_window](https://github.com/Menghuan1918/Smartinput/assets/122662527/0704fea4-19c4-4716-a953-cbeca4dcb653)
 
-- Windows support
+- Windows support(⚠️ Note: Windows currently only supports listening to the clipboard)
   
   ![Win](https://github.com/Menghuan1918/Smartinput/assets/122662527/1060aae1-9a2a-480d-b679-7ded34f1376b)
 
