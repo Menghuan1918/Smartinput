@@ -21,8 +21,8 @@ from PyQt6.QtCore import (
     QPoint,
 )
 import os
-from Config import read_config_file, change_one_config
-from Chat_LLM import predict
+from Tools.Config import read_config_file, change_one_config
+from Tools.Chat_LLM import predict
 import logging
 
 
@@ -342,7 +342,8 @@ class TextSelectionMonitor(QWidget):
 
 
 if __name__ == "__main__":
-    os.environ["QT_QPA_PLATFORM"] = "xcb"
+    if sys.platform == "linux":
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
     os.makedirs(os.path.expanduser("./log"), exist_ok=True)
     logging.basicConfig(
         filename=os.path.expanduser("./log/smartinput.log"),

@@ -33,12 +33,13 @@ main() {
         install
     elif [ "$1" == "uninstall" ]; then
         uninstall
-    else
+    elif [ "$1" == "help" ]; then
         echo "Useage:
 -Install: sh $0 install
 -Uninstall: sh $0 uninstall"
+    else
+        install
     fi
 }
 
-# 调用主函数
 main "$1"
