@@ -1,5 +1,5 @@
-新增监听模式:混合/剪切板/鼠标选择文本
-新增处理模式：直接处理/弹窗二次确认
+New showtext window, now able to stream output/edit final text.
+Add Windows support
 
-New listening Mode Selection:Mixed/Clipboard/Mouse Selection of Text
-New processing Mode Selection:Direct processing/pop-up secondary confirmation
+船新的显示窗口，流式显示输出并且能直接编辑最终文本
+支持Windows

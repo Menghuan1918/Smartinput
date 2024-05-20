@@ -1,7 +1,15 @@
 import sys
 import subprocess
 from PyQt6.QtGui import QCursor, QIcon, QAction, QFont
-from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QPushButton
+from PyQt6.QtWidgets import (
+    QApplication,
+    QTextEdit,
+    QSystemTrayIcon,
+    QMenu,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 from PyQt6.QtCore import (
     QTimer,
     Qt,
@@ -13,9 +21,10 @@ from PyQt6.QtCore import (
     QPoint,
 )
 import os
-from Get_Config import read_config_file
-from Chat_LLM import predict
+from Tools.Config import read_config_file, change_one_config
+from Tools.Chat_LLM import predict
 import logging
+from Tools.Get_Copy import get_selected_text, copy_to_clipboard
 
 
 class Chat_LLM_Single(QObject):
@@ -44,16 +53,27 @@ class Chat_LLM(QRunnable):
         self.text_get.text_get.emit("", False)
 
 
-class TextSelectionMonitor(QLabel):
+class TextSelectionMonitor(QWidget):
     def __init__(self, config):
         super().__init__()
-        self.setWindowFlags(
-            Qt.WindowType.ToolTip
-            | Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-        )
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
         self.hide()
         self.setFont(QFont(config["font"], int(config["font_size"])))
+        self.setWindowTitle("Smartinput")
+        self.setWindowIcon(QIcon("icon.png"))
+
+        # Layout
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+
+        # Text edit
+        self.text_edit = QTextEdit(self)
+        self.layout.addWidget(self.text_edit)
+
+        # Copy button
+        self.copy_button = QPushButton("Copy", self)
+        self.copy_button.clicked.connect(self.copy_to_clipboard_ui)
+        self.layout.addWidget(self.copy_button)
 
         # Check selection every 1000ms
         self.timer = QTimer()
@@ -74,10 +94,18 @@ class TextSelectionMonitor(QLabel):
 
         self.create_menu()
 
-        self.previous_text = self.get_selected_text()
+        self.previous_text = ""
+        self.previous_text = get_selected_text(
+            self.previous_text, self.current_listen_mode
+        )
         self.get_text = ""
-        self.lastMoveTime = 0
-        self.moveInterval = 100
+        self.wait_cursor = 0
+
+        # Try to get last window size, store in config['width'] and config['height']
+        try:
+            self.resize(int(config["width"]), int(config["height"]))
+        except:
+            pass
 
     def create_menu(self):
         self.menu = QMenu()
@@ -136,13 +164,11 @@ class TextSelectionMonitor(QLabel):
 
         # Exit action
         exit_action = QAction(self.tr("Quit"), self)
-        exit_action.triggered.connect(QApplication.instance().quit)
+        exit_action.triggered.connect(self.quit_save_size)
         self.menu.addAction(exit_action)
 
         self.tray_icon.setContextMenu(self.menu)
         self.update_menu()
-
-        self.wait_cursor = 0
 
     def toggle_monitoring(self):
         self.is_monitoring = not self.is_monitoring
@@ -190,7 +216,9 @@ class TextSelectionMonitor(QLabel):
             if self.wait_cursor < 3:
                 self.wait_cursor += 1
             else:
-                selected_text = self.get_selected_text()
+                selected_text = get_selected_text(
+                    self.previous_text, self.current_listen_mode
+                )
                 if selected_text != self.previous_text:
                     self.previous_text = selected_text
                     if self.current_process_mode == "Direct":
@@ -224,8 +252,7 @@ class TextSelectionMonitor(QLabel):
         self.wait_cursor = 0
         self.show()
         self.move(QCursor.pos())
-        self.setText(str(self.tr("Process...Please wait")))
-        self.adjustSize()
+        self.text_edit.setText(str(self.tr("Process...Please wait")))
         lang_dict = {
             "en_US": "English",
             "zh_CN": "Simplified Chinese",
@@ -244,12 +271,9 @@ class TextSelectionMonitor(QLabel):
     def update_text(self, text, flag):
         if flag:
             self.get_text += text
-            #! This is because if directly set text, the window size will change too much
+            self.text_edit.setText(self.get_text)
         else:
             logging.info(f"[Get text]: {self.get_text}")
-            self.setText(self.get_text)
-            self.adjustSize()
-            self.process_flag = False
 
     def final_text(self, text):
         lines = text.split("\n")
@@ -271,73 +295,31 @@ class TextSelectionMonitor(QLabel):
                     processed_lines.append(current_line.strip())
         return " \n ".join(processed_lines)
 
-    def get_selected_text(self):
-        try:
-            text = (
-                subprocess.check_output(["xclip", "-o", "-selection", "clipboard"])
-                .decode("utf-8")
-                .strip()
-            )
-        except:
-            try:
-                text = self.previous_text
-            except:
-                text = ""
-        try:
-            primary_text = (
-                subprocess.check_output(["xclip", "-o", "-selection", "primary"])
-                .decode("utf-8")
-                .strip()
-            )
-        except:
-            primary_text = ""
-        if self.current_listen_mode == "Mixed" and primary_text != "":
-            text = primary_text
-        elif self.current_listen_mode == "Clip":
-            pass
-        elif self.current_listen_mode == "Mouse" and primary_text != "":
-            text = primary_text
-        return text
+    def copy_to_clipboard_ui(self):
+        text = self.text_edit.toPlainText()
+        copy_to_clipboard(text)
+        self.tray_icon.showMessage(
+            self.tr("Copied to clipboard"),
+            text,
+            QSystemTrayIcon.MessageIcon.Information,
+            2000,
+        )
 
-    def copy_to_clipboard(self, text):
-        subprocess.Popen(
-            ["xclip", "-selection", "clipboard"], stdin=subprocess.PIPE
-        ).communicate(text.encode("utf-8"))
+    def closeEvent(self, event):
+        event.ignore()
+        self.process_flag = False
+        self.hide()
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.dragPosition = (
-                event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            )
-            event.accept()
-        elif event.button() == Qt.MouseButton.RightButton:
-            self.hide()
-
-    def mouseMoveEvent(self, event):
-        currentTime = event.timestamp()
-        if (
-            event.buttons() & Qt.MouseButton.LeftButton
-            and (currentTime - self.lastMoveTime) > self.moveInterval
-        ):
-            self.move(event.globalPosition().toPoint() - self.dragPosition)
-            self.lastMoveTime = currentTime
-            event.accept()
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.MiddleButton:
-            self.tray_icon.showMessage(
-                self.tr("Copied to clipboard"),
-                str(self.get_text),
-                QSystemTrayIcon.MessageIcon.Information,
-                2000,
-            )
-            # Copy to clipboard
-            self.copy_to_clipboard(self.get_text)
-            event.accept()
+    def quit_save_size(self):
+        change_one_config("width", str(self.width()))
+        change_one_config("height", str(self.height()))
+        QApplication.instance().quit
+        sys.exit()
 
 
 if __name__ == "__main__":
-    os.environ["QT_QPA_PLATFORM"] = "xcb"
+    if sys.platform == "linux":
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
     os.makedirs(os.path.expanduser("./log"), exist_ok=True)
     logging.basicConfig(
         filename=os.path.expanduser("./log/smartinput.log"),
