@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
-    
+
 permissions:
   contents: read
 
@@ -82,6 +82,7 @@ jobs:
     permissions:
       contents: write
     steps:
+    - uses: actions/checkout@v4
     - name: Download artifact linux
       uses: actions/download-artifact@v4
       with:
