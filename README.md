@@ -34,6 +34,10 @@ Here's a paragraph from GPT-4o's introductory page about the desktop client, wit
 > Unless otherwise noted, all videos or images shown are on **3060M** mobile graphics cards running **llama3-8B** on ollama, and the videos are not **accelerated or multiplied**!
 
 # What's new
+- New showtext window, now able to stream output/edit final text
+  
+  ![New_window](https://github.com/Menghuan1918/Smartinput/assets/122662527/0704fea4-19c4-4716-a953-cbeca4dcb653)
+
 - Windows support
   
   ![Win](https://github.com/Menghuan1918/Smartinput/assets/122662527/1060aae1-9a2a-480d-b679-7ded34f1376b)
