@@ -4,8 +4,6 @@
 name: Python application[Linux, Windows]
 
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -75,7 +73,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-          name: Auto_Packge_Smartinput
+          name: Auto_Packge_Smartinput_Win
           path: |
             ./dist/Smartinput_windows.zip
             ./dist/Win_sha256sum.txt
@@ -84,10 +82,15 @@ jobs:
     needs: [build_linux, build_windows]
     runs-on: ubuntu-latest
     steps:
-    - name: Download artifact
+    - name: Download artifact linux
       uses: actions/download-artifact@v4
       with:
         name: Auto_Packge_Smartinput
+        path: ./dist
+    - name: Download artifact win
+      uses: actions/download-artifact@v4
+      with:
+        name: Auto_Packge_Smartinput_Win
         path: ./dist
     - name: Auto push to release
       run: |
