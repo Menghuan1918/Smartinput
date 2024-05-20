@@ -24,6 +24,7 @@ import os
 from Tools.Config import read_config_file, change_one_config
 from Tools.Chat_LLM import predict
 import logging
+from Tools.Get_Copy import get_selected_text, copy_to_clipboard
 
 
 class Chat_LLM_Single(QObject):
@@ -71,7 +72,7 @@ class TextSelectionMonitor(QWidget):
 
         # Copy button
         self.copy_button = QPushButton("Copy", self)
-        self.copy_button.clicked.connect(self.copy_to_clipboard)
+        self.copy_button.clicked.connect(self.copy_to_clipboard_ui)
         self.layout.addWidget(self.copy_button)
 
         # Check selection every 1000ms
@@ -93,7 +94,10 @@ class TextSelectionMonitor(QWidget):
 
         self.create_menu()
 
-        self.previous_text = self.get_selected_text()
+        self.previous_text = ""
+        self.previous_text = get_selected_text(
+            self.previous_text, self.current_listen_mode
+        )
         self.get_text = ""
         self.wait_cursor = 0
 
@@ -212,7 +216,9 @@ class TextSelectionMonitor(QWidget):
             if self.wait_cursor < 3:
                 self.wait_cursor += 1
             else:
-                selected_text = self.get_selected_text()
+                selected_text = get_selected_text(
+                    self.previous_text, self.current_listen_mode
+                )
                 if selected_text != self.previous_text:
                     self.previous_text = selected_text
                     if self.current_process_mode == "Direct":
@@ -289,39 +295,9 @@ class TextSelectionMonitor(QWidget):
                     processed_lines.append(current_line.strip())
         return " \n ".join(processed_lines)
 
-    def get_selected_text(self):
-        try:
-            text = (
-                subprocess.check_output(["xclip", "-o", "-selection", "clipboard"])
-                .decode("utf-8")
-                .strip()
-            )
-        except:
-            try:
-                text = self.previous_text
-            except:
-                text = ""
-        try:
-            primary_text = (
-                subprocess.check_output(["xclip", "-o", "-selection", "primary"])
-                .decode("utf-8")
-                .strip()
-            )
-        except:
-            primary_text = ""
-        if self.current_listen_mode == "Mixed" and primary_text != "":
-            text = primary_text
-        elif self.current_listen_mode == "Clip":
-            pass
-        elif self.current_listen_mode == "Mouse" and primary_text != "":
-            text = primary_text
-        return text
-
-    def copy_to_clipboard(self):
+    def copy_to_clipboard_ui(self):
         text = self.text_edit.toPlainText()
-        subprocess.Popen(
-            ["xclip", "-selection", "clipboard"], stdin=subprocess.PIPE
-        ).communicate(text.encode("utf-8"))
+        copy_to_clipboard(text)
         self.tray_icon.showMessage(
             self.tr("Copied to clipboard"),
             text,
