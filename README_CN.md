@@ -32,6 +32,14 @@ Smartinput
 > 如无特殊说明，展示的所有视频或者图片均使用**3060M**移动端显卡，在ollama上运行**llama3-8B**，并且视频没有**进行加速或倍速处理**！
 
 # 新功能
+- 船新的显示窗口，流式显示输出并且能直接编辑最终文本(见GIF)：
+  
+  ![New_window](https://github.com/Menghuan1918/Smartinput/assets/122662527/0704fea4-19c4-4716-a953-cbeca4dcb653)
+
+- 支持Windows
+  
+  ![Win](https://github.com/Menghuan1918/Smartinput/assets/122662527/1060aae1-9a2a-480d-b679-7ded34f1376b)
+  
 - 新增监听模式
   
   ![Select](https://github.com/Menghuan1918/Smartinput/assets/122662527/06a26e02-755f-4622-8f42-fdf33b212e8a)
