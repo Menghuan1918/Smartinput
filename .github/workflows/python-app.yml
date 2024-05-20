@@ -82,7 +82,7 @@ jobs:
       with:
         name: Auto_Packge_Smartinput
         path: ./dist
-      - name: Auto push to release
+    - name: Auto push to release
       run: |
         gh release create $(cat version) ./dist/Smartinput.tar.gz ./dist/sha256sum.txt ./dist/Smartinput_windows.zip  ./dist/Win_sha256sum.txt -F whats_new
       env:
