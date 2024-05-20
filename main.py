@@ -21,7 +21,7 @@ from PyQt6.QtCore import (
     QPoint,
 )
 import os
-from Config import read_config_file,change_one_config
+from Config import read_config_file, change_one_config
 from Chat_LLM import predict
 import logging
 
@@ -58,6 +58,8 @@ class TextSelectionMonitor(QWidget):
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
         self.hide()
         self.setFont(QFont(config["font"], int(config["font_size"])))
+        self.setWindowTitle("Smartinput")
+        self.setWindowIcon(QIcon("icon.png"))
 
         # Layout
         self.layout = QVBoxLayout()
@@ -100,7 +102,6 @@ class TextSelectionMonitor(QWidget):
             self.resize(int(config["width"]), int(config["height"]))
         except:
             pass
-
 
     def create_menu(self):
         self.menu = QMenu()
@@ -267,8 +268,6 @@ class TextSelectionMonitor(QWidget):
             self.text_edit.setText(self.get_text)
         else:
             logging.info(f"[Get text]: {self.get_text}")
-            self.text_edit.setText(self.get_text)
-            self.process_flag = False
 
     def final_text(self, text):
         lines = text.split("\n")
@@ -323,15 +322,24 @@ class TextSelectionMonitor(QWidget):
         subprocess.Popen(
             ["xclip", "-selection", "clipboard"], stdin=subprocess.PIPE
         ).communicate(text.encode("utf-8"))
+        self.tray_icon.showMessage(
+            self.tr("Copied to clipboard"),
+            text,
+            QSystemTrayIcon.MessageIcon.Information,
+            2000,
+        )
 
     def closeEvent(self, event):
         event.ignore()
+        self.process_flag = False
         self.hide()
 
     def quit_save_size(self):
         change_one_config("width", str(self.width()))
         change_one_config("height", str(self.height()))
         QApplication.instance().quit
+        sys.exit()
+
 
 if __name__ == "__main__":
     os.environ["QT_QPA_PLATFORM"] = "xcb"
