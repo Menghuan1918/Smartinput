@@ -35,5 +35,5 @@ def get_selected_text(previous_text,mode):
 
 
 def copy_to_clipboard(text):
-    text = text.encode("utf-8")
+    text = str(text)
     pyperclip.copy(text)
