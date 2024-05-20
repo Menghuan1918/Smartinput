@@ -72,6 +72,13 @@ jobs:
         Set-Location .\dist
         Compress-Archive -Path .\main -DestinationPath Smartinput_windows.zip
         Get-FileHash Smartinput_windows.zip -Algorithm SHA256 | Format-List -Property Hash > Win_sha256sum.txt
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: Auto_Packge_Smartinput
+          path: |
+            ./dist/Smartinput_windows.zip
+            ./dist/Win_sha256sum.txt
 
   release:
     needs: [build_linux, build_windows]
