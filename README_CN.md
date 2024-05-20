@@ -36,7 +36,7 @@ Smartinput
   
   ![New_window](https://github.com/Menghuan1918/Smartinput/assets/122662527/0704fea4-19c4-4716-a953-cbeca4dcb653)
 
-- 支持Windows
+- 支持Windows(⚠️注意：Windows暂时仅支持监听剪切板)
   
   ![Win](https://github.com/Menghuan1918/Smartinput/assets/122662527/1060aae1-9a2a-480d-b679-7ded34f1376b)
   
