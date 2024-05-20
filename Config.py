@@ -3,6 +3,9 @@ import logging
 import shutil
 
 def read_config_file():
+    """
+    Read the config file and return the config as a dictionary
+    """
     config_file_path = os.path.expanduser('~/.config/Smartinput/config')
     config = {}
     try:
@@ -26,3 +29,30 @@ def read_config_file():
         logging.error(f"Failed to read config file: {config_file_path}, {e}")
         exit(1)
     return config
+
+def change_one_config(key, value):
+    """
+    Change one config and write it to the config file, if the key is not found, add it to the end of the file
+    """
+    config_file_path = os.path.expanduser('~/.config/Smartinput/config')
+    try:
+        with open(config_file_path, 'r') as file:
+            lines = file.readlines()
+    except Exception as e:
+        logging.error(f"Failed to read config file: {config_file_path}, {e}")
+        return False
+    found = False
+    for i, line in enumerate(lines):
+        if line.startswith(f"{key}="):
+            lines[i] = f"{key}={value}\n"
+            found = True
+            break
+    if not found:
+        lines.append(f"{key}={value}\n")
+    try:
+        with open(config_file_path, 'w') as file:
+            file.writelines(lines)
+    except Exception as e:
+        logging.error(f"Failed to write config file: {config_file_path}, {e}")
+        return False
+    return True
