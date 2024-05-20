@@ -1,7 +1,15 @@
 import sys
 import subprocess
 from PyQt6.QtGui import QCursor, QIcon, QAction, QFont
-from PyQt6.QtWidgets import QApplication, QLabel, QSystemTrayIcon, QMenu, QPushButton
+from PyQt6.QtWidgets import (
+    QApplication,
+    QTextEdit,
+    QSystemTrayIcon,
+    QMenu,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 from PyQt6.QtCore import (
     QTimer,
     Qt,
@@ -44,16 +52,25 @@ class Chat_LLM(QRunnable):
         self.text_get.text_get.emit("", False)
 
 
-class TextSelectionMonitor(QLabel):
+class TextSelectionMonitor(QWidget):
     def __init__(self, config):
         super().__init__()
-        self.setWindowFlags(
-            Qt.WindowType.ToolTip
-            | Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-        )
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
         self.hide()
         self.setFont(QFont(config["font"], int(config["font_size"])))
+
+        # Layout
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+
+        # Text edit
+        self.text_edit = QTextEdit(self)
+        self.layout.addWidget(self.text_edit)
+
+        # Copy button
+        self.copy_button = QPushButton("Copy", self)
+        self.copy_button.clicked.connect(self.copy_to_clipboard)
+        self.layout.addWidget(self.copy_button)
 
         # Check selection every 1000ms
         self.timer = QTimer()
@@ -76,8 +93,7 @@ class TextSelectionMonitor(QLabel):
 
         self.previous_text = self.get_selected_text()
         self.get_text = ""
-        self.lastMoveTime = 0
-        self.moveInterval = 100
+        self.wait_cursor = 0
 
     def create_menu(self):
         self.menu = QMenu()
@@ -141,8 +157,6 @@ class TextSelectionMonitor(QLabel):
 
         self.tray_icon.setContextMenu(self.menu)
         self.update_menu()
-
-        self.wait_cursor = 0
 
     def toggle_monitoring(self):
         self.is_monitoring = not self.is_monitoring
@@ -224,7 +238,7 @@ class TextSelectionMonitor(QLabel):
         self.wait_cursor = 0
         self.show()
         self.move(QCursor.pos())
-        self.setText(str(self.tr("Process...Please wait")))
+        self.text_edit.setText(str(self.tr("Process...Please wait")))
         self.adjustSize()
         lang_dict = {
             "en_US": "English",
@@ -247,7 +261,7 @@ class TextSelectionMonitor(QLabel):
             #! This is because if directly set text, the window size will change too much
         else:
             logging.info(f"[Get text]: {self.get_text}")
-            self.setText(self.get_text)
+            self.text_edit.setText(self.get_text)
             self.adjustSize()
             self.process_flag = False
 
@@ -299,41 +313,11 @@ class TextSelectionMonitor(QLabel):
             text = primary_text
         return text
 
-    def copy_to_clipboard(self, text):
+    def copy_to_clipboard(self):
+        text = self.text_edit.toPlainText()
         subprocess.Popen(
             ["xclip", "-selection", "clipboard"], stdin=subprocess.PIPE
         ).communicate(text.encode("utf-8"))
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.dragPosition = (
-                event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            )
-            event.accept()
-        elif event.button() == Qt.MouseButton.RightButton:
-            self.hide()
-
-    def mouseMoveEvent(self, event):
-        currentTime = event.timestamp()
-        if (
-            event.buttons() & Qt.MouseButton.LeftButton
-            and (currentTime - self.lastMoveTime) > self.moveInterval
-        ):
-            self.move(event.globalPosition().toPoint() - self.dragPosition)
-            self.lastMoveTime = currentTime
-            event.accept()
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.MiddleButton:
-            self.tray_icon.showMessage(
-                self.tr("Copied to clipboard"),
-                str(self.get_text),
-                QSystemTrayIcon.MessageIcon.Information,
-                2000,
-            )
-            # Copy to clipboard
-            self.copy_to_clipboard(self.get_text)
-            event.accept()
 
 
 if __name__ == "__main__":
