@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application[Linux]
+name: Python application[Linux, Windows]
 
 on:
   push:
@@ -13,8 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
+  build_linux:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -48,8 +47,43 @@ jobs:
           path: |
             ./dist/Smartinput.tar.gz
             ./dist/sha256sum.txt
-    - name: Auto push to release
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: 'pip'
+    - name: Install dependencies
       run: |
-        gh release create $(cat version) ./dist/Smartinput.tar.gz ./dist/sha256sum.txt -F whats_new
+        pip install pyinstaller
+        pip install -r requirements.txt
+    - name: Packge the app
+      run: |
+        pyinstaller -w main.py
+        Copy-Item config -Destination .\dist\main
+        Copy-Item icon.png -Destination .\dist\main
+        Copy-Item LICENSE -Destination .\dist\main
+        Copy-Item Refresh_Desktopfile.sh -Destination .\dist\main
+        Copy-Item translations_zh.qm -Destination .\dist\main
+        Set-Location .\dist
+        Compress-Archive -Path .\main -DestinationPath Smartinput_windows.zip
+        Get-FileHash Smartinput_windows.zip -Algorithm SHA256 | Format-List -Property Hash > Win_sha256sum.txt
+
+  release:
+    needs: [build_linux, build_windows]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Auto_Packge_Smartinput
+        path: ./dist
+      - name: Auto push to release
+      run: |
+        gh release create $(cat version) ./dist/Smartinput.tar.gz ./dist/sha256sum.txt ./dist/Smartinput_windows.zip  ./dist/Win_sha256sum.txt -F whats_new
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
