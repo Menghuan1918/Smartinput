@@ -219,7 +219,7 @@ class TextSelectionMonitor(QWidget):
             return
         selected_text = ""
         try:
-            if self.wait_cursor < 3:
+            if self.wait_cursor < 2:
                 self.wait_cursor += 1
             else:
                 selected_text = get_selected_text(

@@ -30,7 +30,7 @@ def read_config_file():
         exit(1)
     return config
 
-def change_one_config(key, value):
+def change_one_config(key, value , explain = "None"):
     """
     Change one config and write it to the config file, if the key is not found, add it to the end of the file
     """
