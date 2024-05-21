@@ -89,8 +89,13 @@ Smartinput
 > 
 > Arch/Manjaro:`sudo pacman -S xclip`
 
-从[releases](https://github.com/Menghuan1918/Smartinput/releases)下载打包好的二进制文件，将文件夹解压并运行Refresh_Desktopfile.sh，其会自动安装到桌面启动项中。卸载请运行Refresh_Desktopfile.sh uninstall并删除文件夹。
-修改好配置文件程序后就能用了！
+从[releases](https://github.com/Menghuan1918/Smartinput/releases)下载打包好的二进制文件，配置文件在首次运行后自动存放在`$HOME/.config/Smartinput/config`中
+
+## Linux
+解压后运行`Refresh_Desktopfile.sh`即可，会自动安装到系统桌面中
+
+## Windows
+解压后运行`main.exe`即可
 
 或者你也可以克隆源代码进行使用，请参照：
 

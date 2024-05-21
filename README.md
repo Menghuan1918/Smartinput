@@ -92,8 +92,13 @@ By default the configuration file is saved in `$HOME/.config/Smartinput/config`.
 > 
 > Arch/Manjaro:`sudo pacman -S xclip`.
 
-Download the packaged binary from [releases](https://github.com/Menghuan1918/Smartinput/releases), unzip the folder and run Refresh_Desktopfile.sh, which will automatically install it into the desktop launcher. To uninstall, run Refresh_Desktopfile.sh uninstall and delete the folder.
-Modify the configuration file program and it will work!
+Download the packaged binary from [releases](https://github.com/Menghuan1918/Smartinput/releases).The configuration file is automatically stored in `$HOME/.config/Smartinput/config` after the first run
+
+## Linux
+Unzip and run `Refresh_Desktopfile.sh`, it will be automatically installed in the system desktop
+
+## Windows
+Unzip and run `main.exe`
 
 Or you can clone the source code to use it, please refer to:
 

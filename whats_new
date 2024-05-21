@@ -1,32 +1,15 @@
-# 🪄Install
-The configuration file is automatically stored in `$HOME/.config/Smartinput/config` after the first run
-
-## Linux
-Unzip and run `Refresh_Desktopfile.sh`, it will be automatically installed in the system desktop
-
-## Windows
-Unzip and run `main.exe`
-
 # 🐛Bug fix
 - Sometimes on wayland it can not catch clip
 - Mouse pointer not in the correct position when outputting text 
-- A dead-end loop that can cause a crash
+- A dead-end loop that can cause a crash(This is why V1.0.4B/C not exist)
 
 # ✨ New feature
 - Add a current status indicator prompt
 
-# 🪄安装
-配置文件在首次运行后自动存放在`$HOME/.config/Smartinput/config`中
-
-## Linux
-解压后运行`Refresh_Desktopfile.sh`即可，会自动安装到系统桌面中
-
-## Windows
-解压后运行`main.exe`即可
-
 # 🐛Bug修复
 - Wayland下有时候不能捕获剪切板
 - 在输出文本时鼠标指针没在正确的位置
+- 一个可能导致崩溃的死循环(这就是为什么V1.0.4B/C不存在的原因)
 
 # ✨ 新特征
 - 添加了当前状态指示提示
