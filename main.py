@@ -1,6 +1,5 @@
 import sys
-import subprocess
-from PyQt6.QtGui import QCursor, QIcon, QAction, QFont
+from PyQt6.QtGui import QCursor, QIcon, QAction, QFont, QTextCursor
 from PyQt6.QtWidgets import (
     QApplication,
     QTextEdit,
@@ -9,6 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+    QStatusBar,
 )
 from PyQt6.QtCore import (
     QTimer,
@@ -28,7 +28,7 @@ from Tools.Get_Copy import get_selected_text, copy_to_clipboard
 
 
 class Chat_LLM_Single(QObject):
-    text_get = pyqtSignal(str, bool)
+    text_get = pyqtSignal(str, int)
 
 
 class Chat_LLM(QRunnable):
@@ -47,10 +47,10 @@ class Chat_LLM(QRunnable):
                 history=[],
                 system_prompt=self.system_prompt,
             ):
-                self.text_get.text_get.emit(get_text, True)
+                self.text_get.text_get.emit(get_text, 1)
         except Exception as e:
-            self.text_get.text_get.emit(str(e), False)
-        self.text_get.text_get.emit("", False)
+            self.text_get.text_get.emit(str(e), 2)
+        self.text_get.text_get.emit("", 0)
 
 
 class TextSelectionMonitor(QWidget):
@@ -71,9 +71,15 @@ class TextSelectionMonitor(QWidget):
         self.layout.addWidget(self.text_edit)
 
         # Copy button
-        self.copy_button = QPushButton("Copy", self)
+        self.copy_button = QPushButton(self.tr("Copy"), self)
         self.copy_button.clicked.connect(self.copy_to_clipboard_ui)
         self.layout.addWidget(self.copy_button)
+
+        # Status bar
+        self.status_bar = QStatusBar()
+        self.layout.addWidget(self.status_bar)
+        status_font_size = max(1, int(config["font_size"]) - 6)
+        self.status_bar.setFont(QFont(config["font"], status_font_size))
 
         # Check selection every 1000ms
         self.timer = QTimer()
@@ -213,7 +219,7 @@ class TextSelectionMonitor(QWidget):
             return
         selected_text = ""
         try:
-            if self.wait_cursor < 3:
+            if self.wait_cursor < 2:
                 self.wait_cursor += 1
             else:
                 selected_text = get_selected_text(
@@ -252,7 +258,7 @@ class TextSelectionMonitor(QWidget):
         self.wait_cursor = 0
         self.show()
         self.move(QCursor.pos())
-        self.text_edit.setText(str(self.tr("Process...Please wait")))
+        self.status_bar.showMessage(self.tr("Processing: Sending request..."))
         lang_dict = {
             "en_US": "English",
             "zh_CN": "Simplified Chinese",
@@ -269,31 +275,21 @@ class TextSelectionMonitor(QWidget):
         self.threadpool.start(Chat_LLM_thread)
 
     def update_text(self, text, flag):
-        if flag:
+        if flag == 1:
             self.get_text += text
             self.text_edit.setText(self.get_text)
+            self.text_edit.moveCursor(QTextCursor.MoveOperation.End)
+            self.status_bar.showMessage(self.tr("Processing: Normal"))
+        elif flag == 2:
+            self.get_text += text
+            self.text_edit.setText(self.get_text)
+            self.text_edit.moveCursor(QTextCursor.MoveOperation.End)
+            self.status_bar.showMessage(self.tr("API error"))
+            logging.error(f"[API error]: {text}")
         else:
+            self.status_bar.showMessage(self.tr("Done"))
+            self.process_flag = False
             logging.info(f"[Get text]: {self.get_text}")
-
-    def final_text(self, text):
-        lines = text.split("\n")
-        processed_lines = []
-        max_len = 35 if config["lang"][:2] == "zh" else 100
-        for line in lines:
-            if len(line) <= max_len:
-                processed_lines.append(line)
-            else:
-                words = line.split()
-                current_line = ""
-                for word in words:
-                    if len(current_line + word) <= max_len:
-                        current_line += word + " "
-                    else:
-                        processed_lines.append(current_line.strip())
-                        current_line = word + " "
-                if current_line:
-                    processed_lines.append(current_line.strip())
-        return " \n ".join(processed_lines)
 
     def copy_to_clipboard_ui(self):
         text = self.text_edit.toPlainText()

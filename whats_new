@@ -1,5 +1,13 @@
-New showtext window, now able to stream output/edit final text.
-Add Windows support
+# 🐛Bug fix
+- Sometimes on wayland it can not catch clip
+- Mouse pointer not in the correct position when outputting text 
 
-船新的显示窗口，流式显示输出并且能直接编辑最终文本
-支持Windows
+# ✨ New feature
+- Add a current status indicator prompt
+
+# 🐛Bug修复
+- Wayland下有时候不能捕获剪切板
+- 在输出文本时鼠标指针没在正确的位置
+
+# ✨ 新特征
+- 添加了当前状态指示提示
