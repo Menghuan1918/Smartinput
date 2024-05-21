@@ -288,7 +288,6 @@ class TextSelectionMonitor(QWidget):
             logging.error(f"[API error]: {text}")
         else:
             self.status_bar.showMessage(self.tr("Done"))
-            self.process_flag = False
             logging.info(f"[Get text]: {self.get_text}")
 
     def copy_to_clipboard_ui(self):
