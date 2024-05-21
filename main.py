@@ -1,5 +1,4 @@
 import sys
-import subprocess
 from PyQt6.QtGui import QCursor, QIcon, QAction, QFont, QTextCursor
 from PyQt6.QtWidgets import (
     QApplication,
@@ -291,26 +290,6 @@ class TextSelectionMonitor(QWidget):
             self.status_bar.showMessage(self.tr("Done"))
             self.process_flag = False
             logging.info(f"[Get text]: {self.get_text}")
-
-    def final_text(self, text):
-        lines = text.split("\n")
-        processed_lines = []
-        max_len = 35 if config["lang"][:2] == "zh" else 100
-        for line in lines:
-            if len(line) <= max_len:
-                processed_lines.append(line)
-            else:
-                words = line.split()
-                current_line = ""
-                for word in words:
-                    if len(current_line + word) <= max_len:
-                        current_line += word + " "
-                    else:
-                        processed_lines.append(current_line.strip())
-                        current_line = word + " "
-                if current_line:
-                    processed_lines.append(current_line.strip())
-        return " \n ".join(processed_lines)
 
     def copy_to_clipboard_ui(self):
         text = self.text_edit.toPlainText()
