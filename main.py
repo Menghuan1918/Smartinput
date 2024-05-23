@@ -54,11 +54,12 @@ class Chat_LLM(QRunnable):
 
 
 class TextSelectionMonitor(QWidget):
-    def __init__(self, config):
+    def __init__(self, General_config):
         super().__init__()
+        self.LLM_config = read_config_file(filename="LLM_config")
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
         self.hide()
-        self.setFont(QFont(config["font"], int(config["font_size"])))
+        self.setFont(QFont(General_config["font"], int(General_config["font_size"])))
         self.setWindowTitle("Smartinput")
         self.setWindowIcon(QIcon("icon.png"))
 
@@ -78,8 +79,8 @@ class TextSelectionMonitor(QWidget):
         # Status bar
         self.status_bar = QStatusBar()
         self.layout.addWidget(self.status_bar)
-        status_font_size = max(1, int(config["font_size"]) - 6)
-        self.status_bar.setFont(QFont(config["font"], status_font_size))
+        status_font_size = max(1, int(General_config["font_size"]) - 5)
+        self.status_bar.setFont(QFont(General_config["font"], status_font_size))
 
         # Check selection every 1000ms
         self.timer = QTimer()
@@ -94,9 +95,9 @@ class TextSelectionMonitor(QWidget):
         self.tray_icon.setToolTip("Smartinput")
 
         self.is_monitoring = True
-        self.current_mode = "Mode 0"
-        self.current_process_mode = "Pop"
-        self.current_listen_mode = "Mixed"
+        self.current_mode = General_config["current_mode"]
+        self.current_process_mode = General_config["current_process_mode"]
+        self.current_listen_mode = General_config["current_listen_mode"]
 
         self.create_menu()
 
@@ -109,7 +110,7 @@ class TextSelectionMonitor(QWidget):
 
         # Try to get last window size, store in config['width'] and config['height']
         try:
-            self.resize(int(config["width"]), int(config["height"]))
+            self.resize(int(General_config["width"]), int(General_config["height"]))
         except:
             pass
 
@@ -149,6 +150,7 @@ class TextSelectionMonitor(QWidget):
         self.listen_mode.addAction(self.listen_mode_mouse)
         self.menu.addMenu(self.listen_mode)
 
+        #! Need to change!
         # Mode selection submenu
         self.mode_menu = QMenu(self.tr("Response mode selection"), self)
         self.mode0_action = QAction(self.tr("Intelligent parsing"), self)
@@ -167,6 +169,7 @@ class TextSelectionMonitor(QWidget):
         self.mode_menu.addAction(self.mode1_action)
         self.mode_menu.addAction(self.mode2_action)
         self.menu.addMenu(self.mode_menu)
+        #! End here
 
         # Exit action
         exit_action = QAction(self.tr("Quit"), self)
@@ -266,11 +269,11 @@ class TextSelectionMonitor(QWidget):
             "es_ES": "Spanish",
             "ja_JP": "Japanese",
         }
-        system_prompt = config[self.current_mode[-1:]]
-        lang = lang_dict.get(config["lang"][:5], "English")
+        system_prompt = self.LLM_config[self.current_mode[-1:]]  #! Need to change!
+        lang = lang_dict.get(General_config["lang"][:5], "English")
         system_prompt = system_prompt.format(lang=lang)
         self.get_text = ""
-        Chat_LLM_thread = Chat_LLM(selected_text, system_prompt, config)
+        Chat_LLM_thread = Chat_LLM(selected_text, system_prompt, self.LLM_config)
         Chat_LLM_thread.text_get.text_get.connect(self.update_text)
         self.threadpool.start(Chat_LLM_thread)
 
@@ -306,15 +309,20 @@ class TextSelectionMonitor(QWidget):
         self.hide()
 
     def quit_save_size(self):
-        change_one_config("width", str(self.width()))
-        change_one_config("height", str(self.height()))
+        change_one_config("General_config", "width", str(self.width()))
+        change_one_config("General_config", "height", str(self.height()))
+        change_one_config("General_config", "current_mode", self.current_mode)
+        change_one_config("General_config", "current_process_mode", self.current_process_mode)
+        change_one_config("General_config", "current_listen_mode", self.current_listen_mode)
         QApplication.instance().quit
         sys.exit()
 
 
 if __name__ == "__main__":
+    #! No wayland support yet
     if sys.platform == "linux":
         os.environ["QT_QPA_PLATFORM"] = "xcb"
+
     os.makedirs(os.path.expanduser("./log"), exist_ok=True)
     logging.basicConfig(
         filename=os.path.expanduser("./log/smartinput.log"),
@@ -323,9 +331,9 @@ if __name__ == "__main__":
     )
     app = QApplication(sys.argv)
     translator = QTranslator()
-    config = read_config_file()
-    locale = config["lang"][:2]
+    General_config = read_config_file(filename="General_config")
+    locale = General_config["lang"][:2]
     if translator.load(f"translations_{locale}.qm"):
         app.installTranslator(translator)
-    monitor = TextSelectionMonitor(config=config)
+    monitor = TextSelectionMonitor(General_config=General_config)
     sys.exit(app.exec())
