@@ -7,8 +7,10 @@ from PyQt6.QtWidgets import (
     QMenu,
     QPushButton,
     QVBoxLayout,
+    QHBoxLayout,
     QWidget,
     QStatusBar,
+    QComboBox
 )
 from PyQt6.QtCore import (
     QTimer,
@@ -21,7 +23,7 @@ from PyQt6.QtCore import (
     QPoint,
 )
 import os
-from Tools.Config import read_config_file, change_one_config
+from Tools.Config import read_config_file, change_one_config, get_prompts
 from Tools.Chat_LLM import predict
 import logging
 from Tools.Get_Copy import get_selected_text, copy_to_clipboard
@@ -71,10 +73,15 @@ class TextSelectionMonitor(QWidget):
         self.text_edit = QTextEdit(self)
         self.layout.addWidget(self.text_edit)
 
+        # Select prompt
+        self.promps = get_prompts()
+        Below_layout = QHBoxLayout()
+        self.select_prompt = QComboBox(self)
+
         # Copy button
         self.copy_button = QPushButton(self.tr("Copy"), self)
         self.copy_button.clicked.connect(self.copy_to_clipboard_ui)
-        self.layout.addWidget(self.copy_button)
+        
 
         # Status bar
         self.status_bar = QStatusBar()
