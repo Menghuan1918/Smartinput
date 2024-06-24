@@ -1,4 +1,4 @@
-pyperclip==1.8.2
+pyperclip==1.9.0
 PyQt6==6.7.0
 PyQt6_sip==13.6.0
 Requests==2.32.2
